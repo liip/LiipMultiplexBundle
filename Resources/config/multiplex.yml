@@ -1,0 +1,9 @@
+services:
+    liip.multiplex:
+        class: Bundle\Liip\MultiplexBundle\Controller\MultiplexController
+        arguments:
+            request: @request
+            response: @response
+            kernel: @kernel
+            router: @router
+        shared: true
