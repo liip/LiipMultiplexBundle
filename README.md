@@ -21,3 +21,8 @@ Installation
 
           # application/config/config.yml
           multiplex.config: ~
+
+  4. To run the unit tests, set SYMFONY in the phpunit.xml
+
+         $ cp phpunit.xml.dist phpunit.xml
+         $ vi phpunit.xml
