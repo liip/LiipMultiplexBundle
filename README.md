@@ -3,7 +3,7 @@ Installation
 
   1. Add this bundle to your project as Git submodules:
 
-          $ git submodule add git://github.com/liip/LiipMultiplexBundle.git src/Bundle/Liip/MultiplexBundle
+          $ git submodule add git://github.com/liip/MultiplexBundle.git src/Bundle/Liip/MultiplexBundle
 
   2. Add this bundle to your application's kernel:
 
@@ -30,3 +30,7 @@ Installation
   5. Copy the functional tests to your projects functional tests
 
          $ cp FunctionalTests/MultiplexTest.php ..
+
+  6. Add calls to your application like:
+
+         http://foo.com/multiplex.json?requests[foo][uri]=/session/new
