@@ -31,6 +31,6 @@ Installation
 
          $ cp FunctionalTests/MultiplexTest.php ..
 
-  6. Add calls to your application like:
+  6. Add calls to your application like in the following example doing two requests at once:
 
-         http://foo.com/multiplex.json?requests[foo][uri]=/session/new
+         http://foo.com/multiplex.json?requests[login][uri]=/session/new&requests[notification][uri]=/notifications&requests[notification][method]=get&requests[notification][parameters][]=broadcasts&requests[notification][parameters][]=personal
