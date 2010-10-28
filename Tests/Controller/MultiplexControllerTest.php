@@ -8,9 +8,11 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        $this->request = $this->getMockBuilder('Symfony\Component\HttpFoundation\Request')->disableOriginalConstructor()->getMock();
+        $this->request = $this->getMockBuilder('Symfony\Component\HttpFoundation\Request')
+            ->disableOriginalConstructor()->setMockClassName(md5('request'.microtime()))->getMock();
 
-        $this->response = $this->getMockBuilder('Symfony\Component\HttpFoundation\Response')->disableOriginalConstructor()->getMock();
+        $this->response = $this->getMockBuilder('Symfony\Component\HttpFoundation\Response')
+            ->disableOriginalConstructor()->setMockClassName(md5('response'.microtime()))->getMock();
         $this->headers = $this->getMockBuilder('Symfony\Component\HttpFoundation\HeaderBag')->disableOriginalConstructor()->getMock();
         $this->response->headers = $this->headers;
 
@@ -24,7 +26,6 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
      */
     public function testConstructor() {
         $controller = new MultiplexController('request', 'response', 'kernel', 'router');
-        $this->assertAttributeSame(array('params'), 'params', $controller);
         $this->assertAttributeSame('request', 'request', $controller);
         $this->assertAttributeSame('response', 'response', $controller);
         $this->assertAttributeSame('kernel', 'kernel', $controller);
@@ -146,7 +147,8 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
             ->with()
             ->will($this->returnValue(''))
         ;
-        $subRequest = $this->getMockBuilder('Symfony\Component\HttpFoundation\Request')->disableOriginalConstructor()->getMock();
+        $subRequest = $this->getMockBuilder('Symfony\Component\HttpFoundation\Request')
+            ->disableOriginalConstructor()->setMockClassName(md5('subRequest'.microtime()))->getMock();
         $subRequest->expects($this->once())
             ->method('getPathInfo')
             ->with()
@@ -171,7 +173,8 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue(null))
         ;
 
-        $subResponse = $this->getMockBuilder('Symfony\Component\HttpFoundation\Response')->disableOriginalConstructor()->getMock();
+        $subResponse = $this->getMockBuilder('Symfony\Component\HttpFoundation\Response')
+            ->disableOriginalConstructor()->setMockClassName(md5('subResponse'.microtime()))->getMock();
         $subResponse->expects($this->once())
             ->method('getContent')
             ->with()
