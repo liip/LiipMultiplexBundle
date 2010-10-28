@@ -22,7 +22,11 @@ Installation
           # application/config/config.yml
           multiplex.config: ~
 
-  4. To run the unit tests, set SYMFONY in the phpunit.xml
+  4. To run the unit tests, set SYMFONY to the src directory inside the symfony vendor dir in the phpunit.xml
 
          $ cp phpunit.xml.dist phpunit.xml
          $ vi phpunit.xml
+
+  5. Copy the functional tests to your projects functional tests
+
+         $ cp FunctionalTests/MultiplexTest.php ..
