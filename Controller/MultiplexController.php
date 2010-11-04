@@ -81,7 +81,7 @@ class MultiplexController
 
         $subRequest->attributes->add($parameters);
         $subResponse = $this->kernel->handle($subRequest, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST);
-        if (substr($subResponse->getStatusCode(), 0, 1) === '3') {
+        if ($subResponse->isRedirect()) {
             $request = array(
                 'uri' => $subResponse->headers->get('location'),
                 'method' => 'get',
