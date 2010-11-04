@@ -11,6 +11,8 @@
 
 namespace Bundle\Liip\MultiplexBundle\Controller;
 
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+
 class MultiplexController
 {
     /**
@@ -65,7 +67,6 @@ class MultiplexController
         if (empty($request['uri'])) {
             throw new \InvalidArgumentException('no uri given for index: '.$i);
         }
-        $request['uri'] = preg_replace('/^('.preg_quote($this->request->getScriptName(), '/').')?\//', '', $request['uri']);
 
         if (empty($request['method'])) {
             $request['method'] = 'get';
@@ -74,13 +75,15 @@ class MultiplexController
             $request['parameters'] = array();
         }
 
+        // strip off index_dev.php to ensure that the uri can be matched
+        $request['uri'] = preg_replace('/^('.preg_quote($this->request->getScriptName(), '/').')?\//', '', $request['uri']);
         $subRequest = $this->request->create($request['uri'], $request['method'], $request['parameters']);
         if (false === ($parameters = $this->router->match($subRequest->getPathInfo()))) {
             throw new \InvalidArgumentException('uri did not match a route for index: '.$i);
         }
 
         $subRequest->attributes->add($parameters);
-        $subResponse = $this->kernel->handle($subRequest, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST);
+        $subResponse = $this->kernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
         if ($subResponse->isRedirect()) {
             $request = array(
                 'uri' => $subResponse->headers->get('location'),
@@ -108,16 +111,19 @@ class MultiplexController
         $requests = (array)$this->request->get('requests');
 
         $content = array('response' => array());
-        foreach ($requests as $i => $request) {
-            if ($_format === 'html') {
-                $content['response'][] = $this->handleRequest($request, $i);
-            } else {
+        // lets "hide" Exception content, except for HTML mode is only for development
+        if ($_format !== 'html') {
+            foreach ($requests as $i => $request) {
                 try {
                     $content['response'][] = $this->handleRequest($request, $i);
                 } catch (\Exception $e) {
                     // TODO: are our error messages safe to be returned?
                     $content['response'][] = array('id' => $i, 'status' => '500', 'html' => $e->getMessage());
                 }
+            }
+        } else {
+            foreach ($requests as $i => $request) {
+                $content['response'][] = $this->handleRequest($request, $i);
             }
         }
 
