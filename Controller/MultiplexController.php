@@ -84,6 +84,8 @@ class MultiplexController
 
         $subRequest->attributes->add($parameters);
         $subResponse = $this->kernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+        // TODO: needs to fix redirects in debug mode as for some reason WebDebugToolbarListener rewrites redirects,
+        // even for HttpKernelInterface::SUB_REQUEST
         if ($subResponse->isRedirect()) {
             $request = array(
                 'uri' => $subResponse->headers->get('location'),
