@@ -8,11 +8,9 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        $this->request = $this->getMockBuilder('Symfony\Component\HttpFoundation\Request')
-            ->disableOriginalConstructor()->setMockClassName(md5('request'.microtime()))->getMock();
+        $this->request = $this->getMockBuilder('Symfony\Component\HttpFoundation\Request')->disableOriginalConstructor()->getMock();
 
-        $this->response = $this->getMockBuilder('Symfony\Component\HttpFoundation\Response')
-            ->disableOriginalConstructor()->setMockClassName(md5('response'.microtime()))->getMock();
+        $this->response = $this->getMockBuilder('Symfony\Component\HttpFoundation\Response')->disableOriginalConstructor()->getMock();
         $this->headers = $this->getMockBuilder('Symfony\Component\HttpFoundation\HeaderBag')->disableOriginalConstructor()->getMock();
         $this->response->headers = $this->headers;
 
@@ -95,6 +93,7 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @covers Bundle\Liip\MultiplexBundle\Controller\MultiplexController::indexAction
+     * @covers Bundle\Liip\MultiplexBundle\Controller\MultiplexController::handleRequest
      */
     public function testIndexActionFaultyParameter()
     {
@@ -107,7 +106,7 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
         $this->request->expects($this->once())
             ->method('get')
             ->with('requests')
-            ->will($this->returnValue(array(array('controller' => ''))))
+            ->will($this->returnValue(array(array('uri' => ''))))
         ;
 
         $this->response->expects($this->once())
@@ -147,49 +146,40 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
             ->with()
             ->will($this->returnValue(''))
         ;
-        $subRequest = $this->getMockBuilder('Symfony\Component\HttpFoundation\Request')
-            ->disableOriginalConstructor()->setMockClassName(md5('subRequest'.microtime()))->getMock();
-        $subRequest->expects($this->once())
-            ->method('getPathInfo')
-            ->with()
-            ->will($this->returnValue($pathinfo))
-        ;
-        $attributes = $this->getMockBuilder('\Symfony\Component\HttpFoundation\ParameterBag')->disableOriginalConstructor()->getMock();
-        $attributes->expects($this->once())
-            ->method('add')
-            ->with($match)
-            ->will($this->returnValue(null))
-        ;
-        $subRequest->attributes = $attributes;
+
+        $session = $this->getMockBuilder('Symfony\Component\HttpFoundation\Session')->disableOriginalConstructor()->getMock();
         $this->request->expects($this->once())
-            ->method('create')
-            ->with($uri, 'get', array())
-            ->will($this->returnValue($subRequest))
+            ->method('getSession')
+            ->with()
+            ->will($this->returnValue($session))
         ;
 
         $this->response->expects($this->once())
             ->method('setContent')
-            ->with('{"response":["'.$sub_content.'"],"status":"success"}')
+            ->with('{"response":[{"id":0,"status":null,"html":"{\"response\":[\"sub content\"]}"}],"status":"success"}')
             ->will($this->returnValue(null))
         ;
 
-        $subResponse = $this->getMockBuilder('Symfony\Component\HttpFoundation\Response')
-            ->disableOriginalConstructor()->setMockClassName(md5('subResponse'.microtime()))->getMock();
+        $subResponse = $this->getMockBuilder('Symfony\Component\HttpFoundation\Response')->disableOriginalConstructor()->getMock();
         $subResponse->expects($this->once())
             ->method('getContent')
             ->with()
             ->will($this->returnValue(json_encode(array('response' => array($sub_content)))))
         ;
+        $subResponse->expects($this->once())
+            ->method('isRedirect')
+            ->with()
+            ->will($this->returnValue(false))
+        ;
 
         $this->router->expects($this->once())
             ->method('match')
-            ->with($pathinfo)
+            ->with($uri)
             ->will($this->returnValue($match))
         ;
 
         $this->kernel->expects($this->once())
             ->method('handle')
-            ->with($subRequest, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST)
             ->will($this->returnValue($subResponse))
         ;
 
