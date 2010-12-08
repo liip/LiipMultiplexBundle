@@ -12,12 +12,13 @@
 namespace Bundle\Liip\MultiplexBundle\Controller;
 
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 class MultiplexController
 {
     /**
      * Request
-     * @var Symfony\Component\HttpFoundation\Request
+     * @var Request
      */
     protected $request;
 
@@ -77,7 +78,7 @@ class MultiplexController
 
         // strip off index_dev.php to ensure that the uri can be matched
         $request['uri'] = preg_replace('/^('.preg_quote($this->request->getScriptName(), '/').')?\//', '', $request['uri']);
-        $subRequest = $this->request->create($request['uri'], $request['method'], $request['parameters']);
+        $subRequest = Request::create($request['uri'], $request['method'], $request['parameters']);
         $subRequest->setSession($this->request->getSession());
         if (false === ($parameters = $this->router->match($subRequest->getPathInfo()))) {
             throw new \InvalidArgumentException('uri did not match a route for index: '.$i);
