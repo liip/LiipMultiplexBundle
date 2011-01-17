@@ -33,7 +33,7 @@ class MultiplexExtension extends Extension
      */
     public function configLoad($config, ContainerBuilder $container)
     {
-        if (!$container->hasDefinition('multiplex')) {
+        if (!$container->hasDefinition('liip.multiplex')) {
             $loader = $this->getFileLoader($container);
             $loader->load($this->resources['config']);
         }
