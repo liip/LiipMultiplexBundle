@@ -12,7 +12,7 @@ Installation
           {
               return array(
                   // ...
-                  new Bundle\Liip\MultiplexBundle\LiipMultiplexBundle(),
+                  new Liip\MultiplexBundle\LiipMultiplexBundle(),
                   // ...
               );
           }

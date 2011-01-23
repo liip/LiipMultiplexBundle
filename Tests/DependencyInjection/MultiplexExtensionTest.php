@@ -2,14 +2,14 @@
 
 namespace Liip\MultiplexBundle\Tests\DependencyInjection;
 
-use Bundle\Liip\MultiplexBundle\DependencyInjection\MultiplexExtension;
+use Liip\MultiplexBundle\DependencyInjection\MultiplexExtension;
 
 class MultiplexBundleExtensionTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @covers Bundle\Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::getXsdValidationBasePath
-     * @covers Bundle\Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::getNamespace
-     * @covers Bundle\Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::getAlias
+     * @covers Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::getXsdValidationBasePath
+     * @covers Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::getNamespace
+     * @covers Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::getAlias
      */
     public function testBoilerplate()
     {
@@ -21,7 +21,7 @@ class MultiplexBundleExtensionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Bundle\Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::configLoad
+     * @covers Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::configLoad
      */
     public function testConfigLoadLoadsYaml()
     {
@@ -35,7 +35,7 @@ class MultiplexBundleExtensionTest extends \PHPUnit_Framework_TestCase
         $fileloader->expects($this->once())
             ->method('load');
 
-        $extension = $this->getMockBuilder('Bundle\Liip\MultiplexBundle\DependencyInjection\MultiplexExtension')
+        $extension = $this->getMockBuilder('Liip\MultiplexBundle\DependencyInjection\MultiplexExtension')
             ->setMethods(array('getFileLoader'))->getMock();
         $extension->expects($this->once())
             ->method('getFileLoader')
@@ -47,7 +47,7 @@ class MultiplexBundleExtensionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Bundle\Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::configLoad
+     * @covers Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::configLoad
      */
     public function testConfigLoadSetParameter()
     {
@@ -72,7 +72,7 @@ class MultiplexBundleExtensionTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Bundle\Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::configLoad
+     * @covers Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::configLoad
      */
     public function testConfigLoadHasDefinition()
     {
@@ -82,7 +82,7 @@ class MultiplexBundleExtensionTest extends \PHPUnit_Framework_TestCase
             ->with('multiplex')
             ->will($this->returnValue(true));
 
-        $extension = $this->getMockBuilder('Bundle\Liip\MultiplexBundle\DependencyInjection\MultiplexExtension')
+        $extension = $this->getMockBuilder('Liip\MultiplexBundle\DependencyInjection\MultiplexExtension')
             ->setMethods(array('getFileLoader'))->getMock();
         $extension->expects($this->never())
             ->method('getFileLoader');
@@ -92,7 +92,7 @@ class MultiplexBundleExtensionTest extends \PHPUnit_Framework_TestCase
 
 
     /**
-     * @covers Bundle\Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::getFileLoader
+     * @covers Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::getFileLoader
      */
     public function testGetFileLoader()
     {

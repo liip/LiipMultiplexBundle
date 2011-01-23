@@ -1,8 +1,8 @@
 <?php
 
-namespace Bundle\Liip\MultiplexBundle\Tests\Controller;
+namespace Liip\MultiplexBundle\Tests\Controller;
 
-use Bundle\Liip\MultiplexBundle\Controller\MultiplexController;
+use Liip\MultiplexBundle\Controller\MultiplexController;
 
 class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
 {
@@ -20,7 +20,7 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Bundle\Liip\MultiplexBundle\Controller\MultiplexController::__construct
+     * @covers Liip\MultiplexBundle\Controller\MultiplexController::__construct
      */
     public function testConstructor() {
         $controller = new MultiplexController('request', 'response', 'kernel', 'router');
@@ -59,7 +59,7 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Bundle\Liip\MultiplexBundle\Controller\MultiplexController::indexAction
+     * @covers Liip\MultiplexBundle\Controller\MultiplexController::indexAction
      */
     public function testIndexActionWithJson()
     {
@@ -70,7 +70,7 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Bundle\Liip\MultiplexBundle\Controller\MultiplexController::indexAction
+     * @covers Liip\MultiplexBundle\Controller\MultiplexController::indexAction
      */
     public function testIndexActionWithDefault()
     {
@@ -81,7 +81,7 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Bundle\Liip\MultiplexBundle\Controller\MultiplexController::indexAction
+     * @covers Liip\MultiplexBundle\Controller\MultiplexController::indexAction
      */
     public function testIndexActionWithHtml()
     {
@@ -92,8 +92,8 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Bundle\Liip\MultiplexBundle\Controller\MultiplexController::indexAction
-     * @covers Bundle\Liip\MultiplexBundle\Controller\MultiplexController::handleRequest
+     * @covers Liip\MultiplexBundle\Controller\MultiplexController::indexAction
+     * @covers Liip\MultiplexBundle\Controller\MultiplexController::handleRequest
      */
     public function testIndexActionFaultyParameter()
     {
@@ -120,8 +120,8 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers Bundle\Liip\MultiplexBundle\Controller\MultiplexController::indexAction
-     * @covers Bundle\Liip\MultiplexBundle\Controller\MultiplexController::handleRequest
+     * @covers Liip\MultiplexBundle\Controller\MultiplexController::indexAction
+     * @covers Liip\MultiplexBundle\Controller\MultiplexController::handleRequest
      */
     public function testIndexActionWithParameter()
     {

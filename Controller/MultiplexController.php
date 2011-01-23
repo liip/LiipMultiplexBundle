@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Bundle\Liip\MultiplexBundle\Controller;
+namespace Liip\MultiplexBundle\Controller;
 
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpFoundation\Request;

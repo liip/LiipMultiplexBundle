@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Bundle\Liip\MultiplexBundle;
+namespace Liip\MultiplexBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -17,4 +17,13 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class LiipMultiplexBundle extends Bundle
 {
+    public function getNamespace()
+    {
+        return __NAMESPACE__;
+    }
+
+    public function getPath()
+    {
+        return strtr(__DIR__, '\\', '/');
+    }
 }
