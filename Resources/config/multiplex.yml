@@ -3,7 +3,7 @@ services:
         class: Liip\MultiplexBundle\Controller\MultiplexController
         arguments:
             request: @request
-            response: @response
+            response: @response=
             kernel: @kernel
             router: @router
-        scope: prototype
+        scope: request
