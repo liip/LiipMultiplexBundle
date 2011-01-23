@@ -28,21 +28,21 @@ class MultiplexExtension extends Extension
     /**
      * Loads the services based on your application configuration.
      *
-     * @param array $config
+     * @param array $configs
      * @param ContainerBuilder $container
      */
-    public function configLoad($config, ContainerBuilder $container)
+    public function configLoad($configs, ContainerBuilder $container)
     {
-        // TODO: merge configs
-        $config = reset($config);
-
-        if (!$container->hasDefinition('liip.multiplex')) {
-            $loader = $this->getFileLoader($container);
-            $loader->load($this->resources['config']);
+        $config = array_pop($configs);
+        foreach ($configs as $tmp) {
+            $config = array_merge($config, $tmp);
         }
 
+        $loader = $this->getFileLoader($container);
+        $loader->load($this->resources['config']);
+
         foreach ($config as $key => $value) {
-            $container->setParameter('multiplex.' . $key, $value);
+            $container->setParameter($this->getAlias().'.'.$key, $value);
         }
     }
 
