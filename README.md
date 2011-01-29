@@ -3,7 +3,7 @@ Installation
 
   1. Add this bundle to your project as Git submodules:
 
-          $ git submodule add git://github.com/liip/MultiplexBundle.git src/Bundle/Liip/MultiplexBundle
+          $ git submodule add git://github.com/liip/MultiplexBundle.git src/Liip/MultiplexBundle
 
   2. Add this bundle to your application's kernel:
 
