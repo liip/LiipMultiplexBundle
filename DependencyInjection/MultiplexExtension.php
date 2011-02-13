@@ -12,7 +12,7 @@
 namespace Liip\MultiplexBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\Extension\Extension;
-use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\FileLocator;
 
@@ -23,7 +23,7 @@ class MultiplexExtension extends Extension
      * @var array
      */
     protected $resources = array(
-        'config' => 'multiplex.yml',
+        'config' => 'multiplex.xml',
     );
 
     /**
@@ -54,7 +54,7 @@ class MultiplexExtension extends Extension
      */
     public function getFileLoader($container)
     {
-        return new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        return new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
     }
 
     /**

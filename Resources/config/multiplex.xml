@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://www.symfony-project.org/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.symfony-project.org/schema/dic/services http://www.symfony-project.org/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+
+        <parameter key="liip_multiplex.controller.class">Liip\MultiplexBundle\Controller\MultiplexController</parameter>
+
+    </parameters>
+
+    <services>
+
+        <service id="liip_multiplex" class="%liip_multiplex.controller.class%" scope="request">
+            <argument type="service" id="request" />
+            <argument type="service" id="response" strict="false" />
+            <argument type="service" id="kernel" />
+            <argument type="service" id="router" />
+        </service>
+
+    </services>
+</container>

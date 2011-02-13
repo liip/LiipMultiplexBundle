@@ -1,4 +1,0 @@
-multiplex:
-    pattern:  /multiplex.{_format}
-    defaults: { _controller: liip.multiplex:indexAction, _format: html }
-    requirements: { _format: (html|json) }

@@ -1,9 +1,0 @@
-services:
-    liip.multiplex:
-        class: Liip\MultiplexBundle\Controller\MultiplexController
-        arguments:
-            request: @request
-            response: @response=
-            kernel: @kernel
-            router: @router
-        scope: request
