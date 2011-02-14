@@ -23,15 +23,15 @@ class MultiplexBundleExtensionTest extends \PHPUnit_Framework_TestCase
     /**
      * @covers Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::configLoad
      */
-    public function testConfigLoadLoadsYaml()
+    public function testConfigLoadSetParameter()
     {
         $container = $this->getMockBuilder('Symfony\Component\DependencyInjection\ContainerBuilder')->disableOriginalConstructor()->getMock();
         $container->expects($this->once())
-            ->method('hasDefinition')
-            ->with('multiplex')
-            ->will($this->returnValue(false));
+            ->method('setParameter')
+            ->with('liip_multiplex.foo', 'bar')
+            ->will($this->returnValue(null));
 
-        $fileloader = $this->getMockBuilder('Symfony\Component\DependencyInjection\Loader\YamlFileLoader')->disableOriginalConstructor()->getMock();
+        $fileloader = $this->getMockBuilder('Symfony\Component\DependencyInjection\Loader\XmlFileLoader')->disableOriginalConstructor()->getMock();
         $fileloader->expects($this->once())
             ->method('load');
 
@@ -42,52 +42,7 @@ class MultiplexBundleExtensionTest extends \PHPUnit_Framework_TestCase
             ->with($container)
             ->will($this->returnValue($fileloader));
 
-
-        $extension->configLoad(array(), $container);
-    }
-
-    /**
-     * @covers Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::configLoad
-     */
-    public function testConfigLoadSetParameter()
-    {
-        $key = 'foo';
-        $value = 'bar';
-        $config = array(
-            $key => $value
-        );
-        $container = $this->getMockBuilder('Symfony\Component\DependencyInjection\ContainerBuilder')->disableOriginalConstructor()->getMock();
-        $container->expects($this->once())
-            ->method('hasDefinition')
-            ->with('multiplex')
-            ->will($this->returnValue(true));
-
-        $container->expects($this->once())
-            ->method('setParameter')
-            ->with('multiplex.'.$key, $value);
-
-        $extension = new MultiplexExtension();
-
-        $extension->configLoad($config, $container);
-    }
-
-    /**
-     * @covers Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::configLoad
-     */
-    public function testConfigLoadHasDefinition()
-    {
-        $container = $this->getMockBuilder('Symfony\Component\DependencyInjection\ContainerBuilder')->disableOriginalConstructor()->getMock();
-        $container->expects($this->once())
-            ->method('hasDefinition')
-            ->with('multiplex')
-            ->will($this->returnValue(true));
-
-        $extension = $this->getMockBuilder('Liip\MultiplexBundle\DependencyInjection\MultiplexExtension')
-            ->setMethods(array('getFileLoader'))->getMock();
-        $extension->expects($this->never())
-            ->method('getFileLoader');
-
-        $extension->configLoad(array(), $container);
+        $extension->configLoad(array(array('foo' => 'bar')), $container);
     }
 
 
@@ -96,12 +51,13 @@ class MultiplexBundleExtensionTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetFileLoader()
     {
+
         $container = $this->getMockBuilder('Symfony\Component\DependencyInjection\ContainerBuilder')->disableOriginalConstructor()->getMock();
 
         $extension = new MultiplexExtension();
 
         $fileloader = $extension->getFileLoader($container);
 
-        $this->assertInstanceOf('Symfony\Component\DependencyInjection\Loader\LoaderInterface', $fileloader);
+        $this->assertInstanceOf('Symfony\Component\Config\Loader\LoaderInterface', $fileloader);
     }
 }
