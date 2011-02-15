@@ -15,8 +15,6 @@ class MultiplexBundleExtensionTest extends \PHPUnit_Framework_TestCase
     {
         $extension = new MultiplexExtension();
 
-        $this->assertNotEmpty($extension->getXsdValidationBasePath());
-        $this->assertNotEmpty($extension->getNamespace());
         $this->assertNotEmpty($extension->getAlias());
     }
 
