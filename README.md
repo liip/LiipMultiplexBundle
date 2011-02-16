@@ -20,7 +20,7 @@ Installation
   3. Configure the `multiplex` service in your config:
 
           # application/config/config.yml
-          multiplex.config: ~
+          liip_multiplex: ~
 
   4. To run the unit tests, set SYMFONY to the src directory inside the symfony vendor dir in the phpunit.xml
 
