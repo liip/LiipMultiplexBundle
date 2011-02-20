@@ -56,12 +56,4 @@ class LiipMultiplexExtension extends Extension
     {
         return new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
     }
-
-    /**
-     * @inheritDoc
-     */
-    public function getAlias()
-    {
-        return 'liip_multiplex';
-    }
 }
