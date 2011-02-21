@@ -14,7 +14,6 @@
 
         <service id="liip_multiplex" class="%liip_multiplex.controller.class%" scope="request">
             <argument type="service" id="request" />
-            <argument type="service" id="response" strict="false" />
             <argument type="service" id="kernel" />
             <argument type="service" id="router" />
         </service>

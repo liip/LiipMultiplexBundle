@@ -13,6 +13,7 @@ namespace Liip\MultiplexBundle\Controller;
 
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class MultiplexController
 {
@@ -21,12 +22,6 @@ class MultiplexController
      * @var Request
      */
     protected $request;
-
-    /**
-     * Response
-     * @var Symfony\Component\HttpFoundation\Response
-     */
-    protected $response;
 
     /**
      * Kernel
@@ -44,14 +39,12 @@ class MultiplexController
      * Constructor
      *
      * @param Symfony\Component\HttpFoundation\Request $request
-     * @param Symfony\Component\HttpFoundation\Response $response
      * @param Symfony\Component\HttpKernel\Kernel $kernel
      * @param Symfony\Component\Routing\RouterInterface $router
      */
-    public function __construct($request, $response, $kernel, $router)
+    public function __construct($request, $kernel, $router)
     {
         $this->request = $request;
-        $this->response = $response;
         $this->kernel = $kernel;
         $this->router = $router;
     }
@@ -130,7 +123,6 @@ class MultiplexController
             }
         }
 
-        $this->response->setStatusCode(200);
         $content['status'] = 'success';
 
         // TODO add xml?
@@ -144,8 +136,6 @@ class MultiplexController
             break;
         }
 
-        $this->response->setContent($content);
-
-        return $this->response;
+        return new Response($content);
     }
 }
