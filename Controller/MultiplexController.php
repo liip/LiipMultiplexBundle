@@ -77,7 +77,7 @@ class MultiplexController
         }
 
         // strip off index_dev.php to ensure that the uri can be matched
-        $request['uri'] = preg_replace('/^('.preg_quote($this->request->getScriptName(), '/').')?\//', '', $request['uri']);
+        $request['uri'] = preg_replace('/^('.preg_quote($this->request->getScriptName(), '/').')?/', '', $request['uri']);
         $subRequest = Request::create($request['uri'], $request['method'], $request['parameters']);
         $subRequest->setSession($this->request->getSession());
         if (false === ($parameters = $this->router->match($subRequest->getPathInfo()))) {
