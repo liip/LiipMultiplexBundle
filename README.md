@@ -1,3 +1,14 @@
+Overview
+========
+
+This Bundles enables "multiplexing" multiple requests into a single request/reponse:
+http://foo.com/multiplex.json?requests[login][uri]=/session/new&requests[notification][uri]=/notifications&requests[notification][method]=get&requests[notification][parameters][]=broadcasts&requests[notification][parameters][]=personal
+
+*Attention*:
+Since Symfony2 core currently does not support security for subrequests installing this Bundle
+basically lets anyone side step the security firewall. Probably some sort of whitelisting
+needs to be implement until Symfony2 core finally gets the ability to secure subrequests.
+
 Installation
 ============
 
@@ -30,7 +41,3 @@ Installation
   5. Copy the functional tests to your projects functional tests
 
          $ cp FunctionalTests/MultiplexTest.php ..
-
-  6. Add calls to your application like in the following example doing two requests at once:
-
-         http://foo.com/multiplex.json?requests[login][uri]=/session/new&requests[notification][uri]=/notifications&requests[notification][method]=get&requests[notification][parameters][]=broadcasts&requests[notification][parameters][]=personal
