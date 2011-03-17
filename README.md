@@ -14,9 +14,17 @@ Installation
 
   1. Add this bundle to your project as Git submodules:
 
-          $ git submodule add git://github.com/liip/MultiplexBundle.git src/Liip/MultiplexBundle
+          $ git submodule add git://github.com/liip/MultiplexBundle.git vendor/bundles/Liip/MultiplexBundle
 
-  2. Add this bundle to your application's kernel:
+  2. Add the Liip namespace to your autoloader:
+
+          // app/autoload.php
+          $loader->registerNamespaces(array(
+                'Liip' => __DIR__.'/../vendor/bundles',
+                // your other namespaces
+          ));
+
+  3. Add this bundle to your application's kernel:
 
           // application/ApplicationKernel.php
           public function registerBundles()
@@ -28,16 +36,16 @@ Installation
               );
           }
 
-  3. Configure the `multiplex` service in your config:
+  4. Configure the `multiplex` service in your config:
 
           # application/config/config.yml
           liip_multiplex: ~
 
-  4. To run the unit tests, set SYMFONY to the src directory inside the symfony vendor dir in the phpunit.xml
+  5. To run the unit tests, set SYMFONY to the src directory inside the symfony vendor dir in the phpunit.xml
 
          $ cp phpunit.xml.dist phpunit.xml
          $ vi phpunit.xml
 
-  5. Copy the functional tests to your projects functional tests
+  6. Copy the functional tests to your projects functional tests
 
          $ cp FunctionalTests/MultiplexTest.php ..
