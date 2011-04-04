@@ -5,9 +5,9 @@ This Bundles enables "multiplexing" multiple requests into a single request/repo
 http://foo.com/multiplex.json?requests[login][uri]=/session/new&requests[notification][uri]=/notifications&requests[notification][method]=get&requests[notification][parameters][]=broadcasts&requests[notification][parameters][]=personal
 
 *Attention*:
-Since Symfony2 core currently does not support security for subrequests installing this Bundle
-basically lets anyone side step the security firewall. Probably some sort of whitelisting
-needs to be implement until Symfony2 core finally gets the ability to secure subrequests.
+Installing this Bundle basically lets anyone side step the security firewall.
+Therefore its important to either secure the multiplex route or to implement
+security checks inside all relevant controllers
 
 Installation
 ============
