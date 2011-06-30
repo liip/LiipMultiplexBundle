@@ -14,7 +14,7 @@ Installation
 
   1. Add this bundle to your project as Git submodules:
 
-          $ git submodule add git://github.com/liip/MultiplexBundle.git vendor/bundles/Liip/MultiplexBundle
+          $ git submodule add git://github.com/liip/LiipMultiplexBundle.git vendor/bundles/Liip/MultiplexBundle
 
   2. Add the Liip namespace to your autoloader:
 
