@@ -4,6 +4,8 @@ Overview
 This Bundles enables "multiplexing" multiple requests into a single request/reponse:
 http://foo.com/multiplex.json?requests[login][uri]=/session/new&requests[notification][uri]=/notifications&requests[notification][method]=get&requests[notification][parameters][]=broadcasts&requests[notification][parameters][]=personal
 
+THIS BUNDLE IS CURRENTLY NOT MAINTAINED
+
 *Attention*:
 Installing this Bundle basically lets anyone side step the security firewall.
 Therefore its important to either secure the multiplex route or to implement
