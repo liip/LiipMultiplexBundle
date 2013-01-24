@@ -7,15 +7,34 @@
     <parameters>
 
         <parameter key="liip_multiplex.controller.class">Liip\MultiplexBundle\Controller\MultiplexController</parameter>
+        <parameter key="liip_multiplex.manager.class">Liip\MultiplexBundle\Manager\MultiplexManager</parameter>
+
+        <parameter key="multiplex_buzz.client.class">Buzz\Client\Curl</parameter>
+        <parameter key="multiplex_buzz.message_factory.class">Buzz\Message\Factory\Factory</parameter>
+        <parameter key="multiplex_buzz.browser.class">Buzz\Browser</parameter>
 
     </parameters>
 
     <services>
 
-        <service id="liip_multiplex" class="%liip_multiplex.controller.class%" scope="request">
+        <service id="liip_multiplex_manager" class="%liip_multiplex.manager.class%" scope="request">
             <argument type="service" id="request" />
             <argument type="service" id="kernel" />
             <argument type="service" id="router" />
+            <argument type="service" id="buzz" />
+        </service>
+
+        <service id="liip_multiplex_controller" class="%liip_multiplex.controller.class%" scope="request">
+            <argument type="service" id="liip_multiplex_manager" />
+        </service>
+
+        <!-- only used if no "buzz" service is available, otherwise use the one from SensioBuzzBundle -->
+        <service id="multiplex_buzz.message_factory" class="%multiplex_buzz.message_factory.class%" public="false" />
+        <service id="multiplex_buzz.client" class="%multiplex_buzz.client.class%" public="false" />
+
+        <service id="multiplex_buzz" class="%multiplex_buzz.browser.class%">
+            <argument type="service" id="multiplex_buzz.client" />
+            <argument type="service" id="multiplex_buzz.message_factory" />
         </service>
 
     </services>
