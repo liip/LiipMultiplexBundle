@@ -83,6 +83,8 @@ if you want to restrict multiplexing to specific routes, define the option in ea
 </route>
 ```
 
+and don't forget to set `restrict_routes` to `true`!
+
 Usage
 =====
 
