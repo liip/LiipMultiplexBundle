@@ -22,6 +22,7 @@ class MultiplexManagerTest extends \PHPUnit_Framework_TestCase
         $this->kernel = $this->getMockBuilder('Symfony\Component\HttpKernel\Kernel')->disableOriginalConstructor()->getMock();
         $this->router = $this->getMockBuilder('Symfony\Component\Routing\RouterInterface')->disableOriginalConstructor()->getMock();
         $this->browser = $this->getMockBuilder('Buzz\Browser')->getMock();
+        $this->request->expects($this->any())->method('getRequestFormat')->will($this->returnValue('json'));
 
         $this->manager = new MultiplexManager($this->kernel, $this->router, $this->browser);
     }
@@ -51,6 +52,14 @@ class MultiplexManagerTest extends \PHPUnit_Framework_TestCase
         $response = $this->manager->multiplex($this->request, 'html');
 
         $this->assertEquals("<pre>array (\n  'responses' => \n  array (\n  ),\n)</pre>", $response->getContent());
+    }
+
+    /**
+     * @expectedException Symfony\Component\HttpKernel\Exception\HttpExceptionInterface
+     */
+    public function testMultiplexWithUnknownFormat()
+    {
+        $response = $this->manager->multiplex($this->request, 'yml');
     }
 
     public function testMultiplexWithFaultyParameters()
@@ -155,6 +164,16 @@ class MultiplexManagerTest extends \PHPUnit_Framework_TestCase
 
         $response = $this->manager->multiplex($this->request);
         $this->assertEquals('{"responses":{"http:\/\/google.de":{"request":"http:\/\/google.de","status":null,"response":"foo"},"http:\/\/google.com":{"request":"http:\/\/google.com","status":null,"response":"bar"}}}', $response->getContent());
+    }
+
+    public function testMultiplexWithUnknownFormatExternalRequests()
+    {
+        $this->multiplexFixture(array(
+            array('uri' => 'http://google.de', 'method' => 'PUT', 'parameters' => null),
+        ));
+
+        $response = $this->manager->multiplex($this->request);
+        $this->assertEquals('{"responses":{"http:\/\/google.de":{"status":501,"response":"HTTP Method PUT not implemented yet"}}}', $response->getContent());
     }
 
     public function testMultiplexWithMultipleInternalRequests()

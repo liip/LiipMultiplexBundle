@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -91,9 +91,10 @@ class MultiplexManager
      * @param string $format the format to return (html|json)
      * @return Response the combined responses
      */
-    public function multiplex(Request $request, $format = 'json')
+    public function multiplex(Request $request, $format = null)
     {
         $this->request = $request;
+        $format = $format ?: $request->getRequestFormat();
 
         $requests = $this->request->get('requests');
         $responses = $this->processRequests($requests ? $requests : array());
@@ -141,9 +142,11 @@ class MultiplexManager
     {
         if ('json' == $format) {
             return new JsonResponse($responses);
+        } elseif ('html' == $format) {
+            return new Response('<pre>' . var_export($responses, true) . '</pre>');
         }
 
-        return new Response('<pre>' . var_export($responses, true) . '</pre>');
+        throw new HttpException(501, 'Response format '.$format.' not implemented yet');
     }
 
     /**
@@ -161,13 +164,13 @@ class MultiplexManager
         if ($this->isInternalRequest($request)) {
             //handle internal requests
             return $this->handleInternalRequest($request, $i);
-        } else {
-            if (false === $this->config['allow_externals']) {
-                throw new BadRequestHttpException('external calls are not enabled');
-            }
-            //handle external requests with buzz
-            return $this->handleExternalRequest($request, $i);
         }
+
+        if (false === $this->config['allow_externals']) {
+            throw new HttpException(400, 'external calls are not enabled');
+        }
+        //handle external requests with buzz
+        return $this->handleExternalRequest($request, $i);
     }
 
     /**
@@ -234,7 +237,7 @@ class MultiplexManager
                 'POST'
             );
         } else {
-            //todo implement all http methods?
+            throw new HttpException(501, 'HTTP Method '.$request['method'].' not implemented yet');
         }
 
         return array(
