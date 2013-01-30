@@ -1,7 +1,14 @@
 <?php
-/**
- * @version $Id: MultiplexManager.php 1373 2013-01-25 16:27:00Z digitalkaoz $
+
+/*
+ * This file is part of the Liip/MultiplexBundle
+ *
+ * (c) Lukas Kahwe Smith <smith@pooteeweet.org>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
  */
+
 namespace Liip\MultiplexBundle\Manager;
 
 use Buzz\Browser;
@@ -24,11 +31,6 @@ use Symfony\Component\Routing\RouterInterface;
 class MultiplexManager
 {
     /**
-     * @var Request
-     */
-    protected $request;
-
-    /**
      * @var HttpKernelInterface
      */
     protected $kernel;
@@ -39,18 +41,12 @@ class MultiplexManager
     protected $router;
 
     /**
-     * @var Browser
-     */
-    protected $browser;
-
-    /**
      * @var array
      */
     protected $config = array(
         'display_errors' => true,
         'route_option' => 'multiplex_expose',
         'restrict_routes' => false,
-        'allow_externals' => true
     );
 
     /**
@@ -58,13 +54,11 @@ class MultiplexManager
      *
      * @param HttpKernelInterface $kernel the Symfony Kernel
      * @param RouterInterface $router the Symfony Router
-     * @param Browser $browser the Buzz Browser
      */
-    public function __construct(HttpKernelInterface $kernel, RouterInterface $router, Browser $browser)
+    public function __construct(HttpKernelInterface $kernel, RouterInterface $router)
     {
         $this->kernel = $kernel;
         $this->router = $router;
-        $this->browser = $browser;
     }
 
     /**
@@ -74,7 +68,6 @@ class MultiplexManager
      *                          display_errors = show exception error messages
      *                          route_option = the route option to be used for restriction checks
      *                          restrict_routes = restrict calling of routes on the ones with the route-option
-     *                          allow_externals = if external requests should be possible
      * @return MultiplexManager
      */
     public function setConfig(array $config)
@@ -93,11 +86,10 @@ class MultiplexManager
      */
     public function multiplex(Request $request, $format = null)
     {
-        $this->request = $request;
         $format = $format ?: $request->getRequestFormat();
 
-        $requests = $this->request->get('requests');
-        $responses = $this->processRequests($requests ? $requests : array());
+        $requests = (array) $request->get('requests', array());
+        $responses = $this->processRequests($request, $requests);
 
         return $this->buildResponse($responses, $format);
     }
@@ -105,26 +97,24 @@ class MultiplexManager
     /**
      * processes all requests
      *
+     * @param Request $request the Symfony Request
      * @param array $requests the requests to process
      * @return array the responses
      */
-    protected function processRequests(array $requests)
+    protected function processRequests(Request $request, array $requests)
     {
         $responses = array('responses' => array());
 
-        foreach ($requests as $i => $request) {
+        foreach ($requests as $i => $requestInfo) {
             try {
-                $response = $this->handleRequest($request, $i);
+                $requestInfo = $this->sanitizeRequest($request, $requestInfo, $i);
+                $response = $this->handleRequest($request, $requestInfo, $i);
                 $responses['responses'][$response['request']] = $response;
             } catch (\Exception $e) {
                 $code = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
 
-                if (true === $this->config['display_errors']) {
-                    $message = $e->getMessage();
-                } else {
-                    $message = Response::$statusTexts[$code];
-                }
-                $responses['responses'][$request['uri']] = array('status' => $code, 'response' => $message);
+                $message = $this->config['display_errors'] ? $e->getMessage() : Response::$statusTexts[$code];
+                $responses['responses'][$requestInfo['uri']] = array('status' => $code, 'response' => $message);
             }
         }
 
@@ -151,40 +141,16 @@ class MultiplexManager
     /**
      * Handle a single request
      *
-     * @param array $request array contains 'uri', 'method' and 'query'
+     * @param Request $request the Symfony Request
+     * @param array $requestInfo array contains 'uri', 'method' and 'query'
      * @param int $i the current request index
      * @return array contains 'request', 'status' and 'response'
-     * @throws HttpExceptionInterface if external calls are disabled
-     */
-    protected function handleRequest(array $request, $i)
-    {
-        $request = $this->sanitizeRequest($request, $i);
-
-        if ($this->isInternalRequest($request)) {
-            //handle internal requests
-            return $this->handleInternalRequest($request, $i);
-        }
-
-        if (false === $this->config['allow_externals']) {
-            throw new HttpException(400, 'external calls are not enabled');
-        }
-        //handle external requests with buzz
-        return $this->handleExternalRequest($request, $i);
-    }
-
-    /**
-     * handles an internal request (by the application itself)
-     *
-     * @param array $request the request object
-     * @param int $i the request index
-     * @return array the response array
      * @throws HttpExceptionInterface if the uri cant be matched by the router
      */
-    protected function handleInternalRequest(array $request, $i)
+    protected function handleRequest(Request $request, array $requestInfo, $i)
     {
-        $request['uri'] = $this->prepareRequestUri($request);
-        $subRequest = Request::create($request['uri'], $request['method'], $request['parameters']);
-        $subRequest->setSession($this->request->getSession());
+        $subRequest = Request::create($requestInfo['uri'], $requestInfo['method'], $requestInfo['parameters']);
+        $subRequest->setSession($request->getSession());
 
         if (false === ($parameters = $this->router->match($subRequest->getPathInfo()))) {
             throw new NotFoundHttpException('uri did not match a route for path: ' . $subRequest->getPathInfo());
@@ -203,95 +169,41 @@ class MultiplexManager
         if ($response->isRedirect()) {
             $request = array(
                 'uri' => $response->headers->get('location'),
-                'method' => 'get',
+                'method' => 'GET',
                 'parameters' => array(),
             );
-            return $this->handleRequest($request, $i);
+
+            return $this->handleRequest($request, $requestInfo, $i);
         }
 
         return array(
-            'request' => $request['uri'],
+            'request' => $requestInfo['uri'],
             'status' => $response->getStatusCode(),
             'response' => $response->getContent(),
         );
     }
 
     /**
-     * handles an external request with buzz
-     *
-     * @param array $request the request object
-     * @param int $i the request index
-     * @return array the response array
-     */
-    protected function handleExternalRequest(array $request, $i)
-    {
-        switch ($request['method']) {
-            case 'GET' :
-                $delimiter = strpos($request['uri'], '?') === false ? '?' : '&';
-                $response = $this->browser->get($request['uri'] . $delimiter . http_build_query($request['parameters']));
-                break;
-            case 'POST' :
-                $response = $this->browser->submit(
-                    $request['uri'],
-                    $request['parameters'],
-                    'POST'
-                );
-                break;
-            default:
-                throw new HttpException(501, 'HTTP Method '.$request['method'].' not implemented yet');
-        }
-
-        return array(
-            'request' => $request['uri'],
-            'status' => $response->getStatusCode(),
-            'response' => $response->getContent(),
-        );
-    }
-
-    /**
-     * @param array $request the request object
+     * @param Request $request the Symfony Request
+     * @param array $requestInfo array contains 'uri', 'method' and 'query'
      * @param int $i the request index
      * @return array the sanitized request
      * @throws \InvalidArgumentException if the single request is invalid
      */
-    private function sanitizeRequest(array $request, $i)
+    private function sanitizeRequest(Request $request, array $requestInfo, $i)
     {
-        if (empty($request['uri'])) {
+        if (empty($requestInfo['uri'])) {
             throw new \InvalidArgumentException('no uri given for index: ' . $i);
         }
 
-        if (empty($request['method'])) {
-            $request['method'] = 'GET';
+        $requestInfo['uri'] = preg_replace('/^(' . preg_quote($request->getScriptName(), '/') . ')?/', '', $requestInfo['uri']);
+
+        $requestInfo['method'] = empty($requestInfo['method']) ? 'GET' : strtoupper($requestInfo['method']);
+
+        if (empty($requestInfo['parameters'])) {
+            $requestInfo['parameters'] = array();
         }
 
-        $request['method'] = strtoupper($request['method']);
-
-        if (empty($request['parameters'])) {
-            $request['parameters'] = array();
-        }
-
-        return $request;
-    }
-
-    /**
-     * checks if the subRequest is an internal Request which could be handled by our application
-     *
-     * @param array $request the request
-     * @return boolean if the request can be handled by our application
-     */
-    private function isInternalRequest(array $request)
-    {
-        return strpos($request['uri'], '/') === 0;
-    }
-
-    /**
-     * prepares a local url to a path which could be matched by the Router
-     *
-     * @param array $request the Request Array
-     * @return string the prepared uri
-     */
-    private function prepareRequestUri(array $request)
-    {
-        return preg_replace('/^(' . preg_quote($this->request->getScriptName(), '/') . ')?/', '', $request['uri']);
+        return $requestInfo;
     }
 }
