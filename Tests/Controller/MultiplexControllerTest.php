@@ -14,7 +14,7 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        $this->manager = $this->getMockBuilder('Liip\MultiplexBundle\Manager\MultiplexManager')
+        $this->manager = $this->getMockBuilder('Liip\MultiplexBundle\Multiplexer\InternalRequestMultiplexer')
             ->setMethods(array('multiplex'))
             ->disableOriginalConstructor()
             ->getMock();
