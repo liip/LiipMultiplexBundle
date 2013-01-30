@@ -140,10 +140,9 @@ class MultiplexManager
      */
     protected function buildResponse(array $responses, $format)
     {
-        if ('json' == $format) {
-            return new JsonResponse($responses);
-        } elseif ('html' == $format) {
-            return new Response('<pre>' . var_export($responses, true) . '</pre>');
+        switch ($format) {
+            case 'json' : return new JsonResponse($responses);
+            case 'html' : return new Response('<pre>' . var_export($responses, true) . '</pre>');
         }
 
         throw new HttpException(501, 'Response format '.$format.' not implemented yet');
@@ -226,18 +225,20 @@ class MultiplexManager
      */
     protected function handleExternalRequest(array $request, $i)
     {
-        if ('GET' == $request['method']) {
-            $delimiter = strpos($request['uri'], '?') === false ? '?' : '&';
-            $response = $this->browser->get($request['uri'] . $delimiter . http_build_query($request['parameters']));
-        } elseif ('POST' == $request['method']) {
-
-            $response = $this->browser->submit(
-                $request['uri'],
-                $request['parameters'],
-                'POST'
-            );
-        } else {
-            throw new HttpException(501, 'HTTP Method '.$request['method'].' not implemented yet');
+        switch ($request['method']) {
+            case 'GET' :
+                $delimiter = strpos($request['uri'], '?') === false ? '?' : '&';
+                $response = $this->browser->get($request['uri'] . $delimiter . http_build_query($request['parameters']));
+                break;
+            case 'POST' :
+                $response = $this->browser->submit(
+                    $request['uri'],
+                    $request['parameters'],
+                    'POST'
+                );
+                break;
+            default:
+                throw new HttpException(501, 'HTTP Method '.$request['method'].' not implemented yet');
         }
 
         return array(
@@ -262,6 +263,9 @@ class MultiplexManager
         if (empty($request['method'])) {
             $request['method'] = 'GET';
         }
+
+        $request['method'] = strtoupper($request['method']);
+
         if (empty($request['parameters'])) {
             $request['parameters'] = array();
         }

@@ -31,6 +31,6 @@ class MultiplexController
      */
     public function indexAction(Request $request)
     {
-        return $this->manager->multiplex($request, $request->getRequestFormat());
+        return $this->manager->multiplex($request);
     }
 }

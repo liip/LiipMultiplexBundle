@@ -29,26 +29,26 @@ Multiplexer = (function () {
         var prepared = {};
         var filter = filter;
 
-        $.each(requests, function(index, current) {
+        $.each(requests, function (index, current) {
             //request filtering
-            if(filter.length && -1 == $.inArray(current.request.uri, filter)) {
+            if (filter.length && -1 == $.inArray(current.request.uri, filter)) {
                 return false;
             }
 
             prepared[current.request.uri] = {
-                'uri' : current.request.uri,
-                'method' : (typeof current.request.method != 'undefined' ? current.request.method : 'GET'),
-                'parameters' : (typeof current.request.parameters != 'undefined' ? current.request.parameters : [])
+                'uri': current.request.uri,
+                'method': (typeof current.request.method != 'undefined' ? current.request.method : 'GET'),
+                'parameters': (typeof current.request.parameters != 'undefined' ? current.request.parameters : [])
             };
         });
 
-        return {'requests' : prepared};
+        return {'requests': prepared};
     }
 
     function callMasterRequest(filter, successCallback, errorCallback) {
         $.ajax(multiplexerEndpoint, {
             cache: false,
-            data : preparedRequests(filter ? filter : []),
+            data: preparedRequests(filter ? filter : []),
             dataType: requestFormat,
             error: (errorCallback ? errorCallback : onError),
             success: (successCallback ? successCallback : onSuccess)
@@ -59,7 +59,7 @@ Multiplexer = (function () {
      * default global onError Callback
      */
     function onError(xhr, status, error) {
-        if(typeof console != 'undefined') {
+        if (typeof console != 'undefined') {
             console.log(error);
         }
     }
@@ -69,7 +69,7 @@ Multiplexer = (function () {
      */
     function onSuccess(data, status, xhr) {
         if ('json' == requestFormat) {
-            $.each(data.responses, function(uri, response) {
+            $.each(data.responses, function (uri, response) {
                 if (response.status < 400) {
                     requests[response.request].success(response.response);
                 } else {
@@ -78,6 +78,9 @@ Multiplexer = (function () {
             });
         } else {
             //TODO what todo with html, cant dispatch them across callbacks
+            if (typeof console != 'undefined') {
+                console.log('request format '+requestFormat+' not implemented');
+            }
         }
     }
 
@@ -90,7 +93,7 @@ Multiplexer = (function () {
          *
          * @param url
          */
-        setEndpoint : function (url) {
+        setEndpoint: function (url) {
             multiplexerEndpoint = url;
         },
 
@@ -99,7 +102,7 @@ Multiplexer = (function () {
          *
          * @param format
          */
-        setFormat : function(format) {
+        setFormat: function (format) {
             requestFormat = format;
         },
 
@@ -118,7 +121,7 @@ Multiplexer = (function () {
          * @param successCallback the success callback to call if this particular request was ok
          * @param errorCallback the error callback to call if this particular request resulted in an error
          */
-        add : function(requestObject, successCallback, errorCallback) {
+        add: function (requestObject, successCallback, errorCallback) {
             addRequest(requestObject, successCallback, errorCallback);
         },
 
@@ -131,14 +134,14 @@ Multiplexer = (function () {
          * @param successCallback will be called on overall success
          * @param errorCallback will be called on overall failure
          */
-        call : function(filter, successCallback, errorCallback) {
+        call: function (filter, successCallback, errorCallback) {
             callMasterRequest(filter, successCallback, errorCallback);
         },
 
         /**
          * clear all requests
          */
-        clear : function() {
+        clear: function () {
             requests = {};
         },
 
@@ -147,7 +150,7 @@ Multiplexer = (function () {
          *
          * @param uri
          */
-        remove : function(uri) {
+        remove: function (uri) {
             delete  requests[uri];
         }
     }
