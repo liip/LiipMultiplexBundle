@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xsd:schema xmlns="http://example.org/schema/dic/liip_multiplex"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://example.org/schema/dic/liip_multiplex"
+            elementFormDefault="qualified">
+
+    <xsd:element name="config" type="config" />
+
+    <xsd:complexType name="config">
+        <xsd:all>
+            <xsd:element name="display_errors" type="xsd:boolean" minOccurs="0" maxOccurs="1" default="true" />
+            <xsd:element name="restrict_routes" type="xsd:boolean" minOccurs="0" maxOccurs="1" default="false" />
+            <xsd:element name="route_option" type="xsd:string" minOccurs="0" maxOccurs="1" default="multiplex_expose" />
+            <xsd:element name="allow_externals" type="xsd:boolean" minOccurs="0" maxOccurs="1" default="true" />
+        </xsd:all>
+    </xsd:complexType>
+</xsd:schema>

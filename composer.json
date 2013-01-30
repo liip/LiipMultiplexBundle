@@ -1,0 +1,27 @@
+{
+    "name": "liip/multiplex-bundle",
+    "type": "symfony-bundle",
+    "description": "This Bundles enables 'multiplexing' multiple requests into a single Request/Response",
+    "keywords": ["http"],
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "Liip AG",
+            "homepage": "http://www.liip.ch/"
+        },
+        {
+            "name": "Community contributions",
+            "homepage": "https://github.com/liip/LiipMultiplexBundle/contributors"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.2",
+        "symfony/framework-bundle": ">=2.1,<=2.3-dev",
+        "kriswallsmith/buzz": ">=0.7"
+    },
+    "autoload": {
+        "psr-0": { "Liip\\MultiplexBundle": "" }
+    },
+    "target-dir": "Liip/MultiplexBundle"
+}

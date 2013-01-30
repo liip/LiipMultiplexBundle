@@ -4,9 +4,9 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
 
-    <route id="multiplex" pattern="/multiplex.{_format}">
-        <default key="_controller">liip_multiplex:indexAction</default>
-        <default key="_format">html</default>
+    <route id="liip_multiplex" pattern="/multiplex.{_format}">
+        <default key="_controller">liip_multiplex_controller:indexAction</default>
+        <default key="_format">json</default>
         <requirement key="_format">(html|json)</requirement>
     </route>
 </routes>

@@ -2,60 +2,57 @@
 
 namespace Liip\MultiplexBundle\Tests\DependencyInjection;
 
-use Liip\MultiplexBundle\DependencyInjection\MultiplexExtension;
+use Liip\MultiplexBundle\DependencyInjection\LiipMultiplexExtension;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
+/**
+ * @covers Liip\MultiplexBundle\DependencyInjection\LiipMultiplexExtension
+ * @covers Liip\MultiplexBundle\DependencyInjection\Configuration
+ */
 class MultiplexBundleExtensionTest extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * @covers Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::getXsdValidationBasePath
-     * @covers Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::getNamespace
-     * @covers Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::getAlias
-     */
     public function testBoilerplate()
     {
-        $extension = new MultiplexExtension();
+        $extension = new LiipMultiplexExtension();
 
         $this->assertNotEmpty($extension->getAlias());
     }
 
-    /**
-     * @covers Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::configLoad
-     */
-    public function testConfigLoadSetParameter()
+    public function testLoad()
     {
-        $container = $this->getMockBuilder('Symfony\Component\DependencyInjection\ContainerBuilder')->disableOriginalConstructor()->getMock();
-        $container->expects($this->once())
-            ->method('setParameter')
-            ->with('liip_multiplex.foo', 'bar')
-            ->will($this->returnValue(null));
+        $container = new ContainerBuilder();
+        $extension = new LiipMultiplexExtension();
 
-        $fileloader = $this->getMockBuilder('Symfony\Component\DependencyInjection\Loader\XmlFileLoader')->disableOriginalConstructor()->getMock();
-        $fileloader->expects($this->once())
-            ->method('load');
+        $extension->load(array(), $container);
 
-        $extension = $this->getMockBuilder('Liip\MultiplexBundle\DependencyInjection\MultiplexExtension')
-            ->setMethods(array('getFileLoader'))->getMock();
-        $extension->expects($this->once())
-            ->method('getFileLoader')
-            ->with($container)
-            ->will($this->returnValue($fileloader));
+        $resources = $container->getResources();
+        $this->assertGreaterThan(0, count($resources));
 
-        $extension->configLoad(array(array('foo' => 'bar')), $container);
+        $expectedServices = array(
+            'liip_multiplex_controller',
+            'liip_multiplex_manager'
+        );
+
+        foreach ($expectedServices as $serviceId) {
+            $this->assertTrue($container->hasDefinition($serviceId), $serviceId);
+        }
+
+        //test default config
+        $calls = $container->getDefinition('liip_multiplex_manager')->getMethodCalls();
+        $this->assertGreaterThan(0, count($calls));
+        $this->assertContains('setConfig', $calls[0]);
+        $this->assertEquals(array(
+            'display_errors' => true,
+            'restrict_routes' => false,
+            'allow_externals' => true,
+            'route_option' => 'multiplex_expose'
+        ), $calls[0][1][0]);
     }
 
-
-    /**
-     * @covers Liip\MultiplexBundle\DependencyInjection\MultiplexExtension::getFileLoader
-     */
-    public function testGetFileLoader()
+    public function testXsdValidationBasePath()
     {
+        $extension = new LiipMultiplexExtension();
 
-        $container = $this->getMockBuilder('Symfony\Component\DependencyInjection\ContainerBuilder')->disableOriginalConstructor()->getMock();
-
-        $extension = new MultiplexExtension();
-
-        $fileloader = $extension->getFileLoader($container);
-
-        $this->assertInstanceOf('Symfony\Component\Config\Loader\LoaderInterface', $fileloader);
+        $this->assertContains('/../Resources/config/schema', $extension->getXsdValidationBasePath());
     }
 }

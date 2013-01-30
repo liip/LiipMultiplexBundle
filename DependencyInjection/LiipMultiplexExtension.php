@@ -11,20 +11,13 @@
 
 namespace Liip\MultiplexBundle\DependencyInjection;
 
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
-use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 class LiipMultiplexExtension extends Extension
 {
-    /**
-     * Yaml config files to load
-     * @var array
-     */
-    protected $resources = array(
-        'config' => 'multiplex.xml',
-    );
 
     /**
      * Loads the services based on your application configuration.
@@ -34,26 +27,28 @@ class LiipMultiplexExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container)
     {
-        $config = array_shift($configs);
-        foreach ($configs as $tmp) {
-            $config = array_replace_recursive($config, $tmp);
-        }
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader->load('multiplex.xml');
 
-        $loader = $this->getFileLoader($container);
-        $loader->load($this->resources['config']);
+        $processedConfig = $this->processConfiguration(new Configuration(), $configs);
 
-        foreach ($config as $key => $value) {
-            $container->setParameter($this->getAlias().'.'.$key, $value);
+        if ($container->hasDefinition('liip_multiplex_manager')) {
+            $container->getDefinition('liip_multiplex_manager')->addMethodCall('setConfig', array($processedConfig));
+
+            //replace buzz with own buzz-service if not available
+            if (!$container->hasDefinition('buzz')) {
+                $container->getDefinition('liip_multiplex_manager')->replaceArgument(2, $container->getDefinition('liip_multiplex_buzz'));
+            }
         }
     }
 
     /**
-     * Get File Loader
+     * Returns the base path for the XSD files.
      *
-     * @param ContainerBuilder $container
+     * @return string The XSD base path
      */
-    public function getFileLoader($container)
+    public function getXsdValidationBasePath()
     {
-        return new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        return __DIR__ . '/../Resources/config/schema';
     }
 }
