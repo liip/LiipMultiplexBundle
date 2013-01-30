@@ -1,18 +1,16 @@
 <?php
 
-namespace Liip\MultiplexBundle\Tests\Manager;
+namespace Liip\MultiplexBundle\Tests\Multiplexer;
 
-use Buzz\Client\Curl;
-use Buzz\Message\Response;
-use Liip\MultiplexBundle\Manager\MultiplexManager;
+use Liip\MultiplexBundle\Multiplexer\InternalRequestMultiplexer;
 
 /**
- * @covers Liip\MultiplexBundle\Manager\MultiplexManager
+ * @covers Liip\MultiplexBundle\Multiplexer\InternalRequestMultiplexer<extended>
  */
-class MultiplexManagerTest extends \PHPUnit_Framework_TestCase
+class InternalRequestMultiplexerTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * MultiplexManager
+     * InternalRequestMultiplexer
      */
     protected $manager;
 
@@ -21,10 +19,9 @@ class MultiplexManagerTest extends \PHPUnit_Framework_TestCase
         $this->request = $this->getMockBuilder('Symfony\Component\HttpFoundation\Request')->disableOriginalConstructor()->getMock();
         $this->kernel = $this->getMockBuilder('Symfony\Component\HttpKernel\Kernel')->disableOriginalConstructor()->getMock();
         $this->router = $this->getMockBuilder('Symfony\Component\Routing\RouterInterface')->disableOriginalConstructor()->getMock();
-        $this->browser = $this->getMockBuilder('Buzz\Browser')->getMock();
         $this->request->expects($this->any())->method('getRequestFormat')->will($this->returnValue('json'));
 
-        $this->manager = new MultiplexManager($this->kernel, $this->router, $this->browser);
+        $this->manager = new InternalRequestMultiplexer($this->kernel, $this->router);
     }
 
     public function testConstructor()
@@ -66,7 +63,6 @@ class MultiplexManagerTest extends \PHPUnit_Framework_TestCase
     {
         $this->multiplexFixture(array(
             array('uri' => ''),
-            array('uri' => 'http://google.com'),
             array('uri' => '/'),
             array('uri' => '/foobar')
         ));
@@ -91,26 +87,24 @@ class MultiplexManagerTest extends \PHPUnit_Framework_TestCase
 
         //with error messages on
         $this->manager->setConfig(array(
-            'allow_externals' => false,
             'restrict_routes' => true,
             'display_errors' => true
         ));
 
         $response = $this->manager->multiplex($this->request, 'json');
-        $this->assertEquals('{"responses":{"":{"status":500,"response":"no uri given for index: 0"},"http:\/\/google.com":{"status":400,"response":"external calls are not enabled"},"\/":{"status":403,"response":"route not able to be multiplexed"},"\/foobar":{"status":404,"response":"uri did not match a route for path: \/foobar"}}}', $response->getContent());
+        $this->assertEquals('{"responses":{"":{"status":500,"response":"no uri given for index: 0"},"\/":{"status":403,"response":"route not able to be multiplexed"},"\/foobar":{"status":404,"response":"uri did not match a route for path: \/foobar"}}}', $response->getContent());
 
         //with error messages off
         $this->manager->setConfig(array(
-            'allow_externals' => false,
             'restrict_routes' => true,
             'display_errors' => false
         ));
 
         $response = $this->manager->multiplex($this->request, 'json');
-        $this->assertEquals('{"responses":{"":{"status":500,"response":"Internal Server Error"},"http:\/\/google.com":{"status":400,"response":"Bad Request"},"\/":{"status":403,"response":"Forbidden"},"\/foobar":{"status":404,"response":"Not Found"}}}', $response->getContent());
+        $this->assertEquals('{"responses":{"":{"status":500,"response":"Internal Server Error"},"\/":{"status":403,"response":"Forbidden"},"\/foobar":{"status":404,"response":"Not Found"}}}', $response->getContent());
     }
 
-    public function testMultiplexWithOneInternalRequest()
+    public function testMultiplexWithOneRequest()
     {
         $uri = 'test/uri';
         $match = array('match');
@@ -144,36 +138,6 @@ class MultiplexManagerTest extends \PHPUnit_Framework_TestCase
 
         $response = $this->manager->multiplex($this->request);
         $this->assertEquals('{"responses":{"\/test\/uri":{"request":"\/test\/uri","status":200,"response":"sub content"}}}', $response->getContent());
-    }
-
-    public function testMultiplexWithExternalRequests()
-    {
-        $this->multiplexFixture(array(
-            array('uri' => 'http://google.de', 'method' => null, 'parameters' => null),
-            array('uri' => 'http://google.com', 'method' => 'POST', 'parameters' => array('q' => 'foo')),
-        ));
-
-        $getResponse = new Response();
-        $getResponse->setContent('foo');
-
-        $postResponse = new Response();
-        $postResponse->setContent('bar');
-
-        $this->browser->expects($this->atLeastOnce())->method('get')->will($this->returnValue($getResponse));
-        $this->browser->expects($this->atLeastOnce())->method('submit')->will($this->returnValue($postResponse));
-
-        $response = $this->manager->multiplex($this->request);
-        $this->assertEquals('{"responses":{"http:\/\/google.de":{"request":"http:\/\/google.de","status":null,"response":"foo"},"http:\/\/google.com":{"request":"http:\/\/google.com","status":null,"response":"bar"}}}', $response->getContent());
-    }
-
-    public function testMultiplexWithUnknownFormatExternalRequests()
-    {
-        $this->multiplexFixture(array(
-            array('uri' => 'http://google.de', 'method' => 'PUT', 'parameters' => null),
-        ));
-
-        $response = $this->manager->multiplex($this->request);
-        $this->assertEquals('{"responses":{"http:\/\/google.de":{"status":501,"response":"HTTP Method PUT not implemented yet"}}}', $response->getContent());
     }
 
     public function testMultiplexWithMultipleInternalRequests()

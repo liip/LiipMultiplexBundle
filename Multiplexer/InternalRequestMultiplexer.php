@@ -1,6 +1,5 @@
 <?php
-
-/*
+/**
  * This file is part of the Liip/MultiplexBundle
  *
  * (c) Lukas Kahwe Smith <smith@pooteeweet.org>
@@ -8,10 +7,8 @@
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
  */
+namespace Liip\MultiplexBundle\Multiplexer;
 
-namespace Liip\MultiplexBundle\Manager;
-
-use Buzz\Browser;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,11 +21,11 @@ use Symfony\Component\Routing\Matcher\TraceableUrlMatcher;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
- * Multiplexes a bunch of Requests, and returns one Response
+ * 
  *
- * @author Robert Schönthal <robert.schoenthal@gmail.com>
+ * @author Robert Schönthal <schoenthal.robert_FR@guj.de>
  */
-class MultiplexManager
+class InternalRequestMultiplexer implements MultiplexerInterface
 {
     /**
      * @var HttpKernelInterface
@@ -68,7 +65,7 @@ class MultiplexManager
      *                          display_errors = show exception error messages
      *                          route_option = the route option to be used for restriction checks
      *                          restrict_routes = restrict calling of routes on the ones with the route-option
-     * @return MultiplexManager
+     * @return MultiplexerInterface
      */
     public function setConfig(array $config)
     {

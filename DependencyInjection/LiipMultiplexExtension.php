@@ -32,13 +32,16 @@ class LiipMultiplexExtension extends Extension
 
         $processedConfig = $this->processConfiguration(new Configuration(), $configs);
 
-        if ($container->hasDefinition('liip_multiplex_manager')) {
-            $container->getDefinition('liip_multiplex_manager')->addMethodCall('setConfig', array($processedConfig));
+        if ($container->hasDefinition('liip_multiplex_handler')) {
+            $container->getDefinition('liip_multiplex_handler')->addMethodCall('setConfig', array($processedConfig));
+        }
 
-            //replace buzz with own buzz-service if not available
-            if (!$container->hasDefinition('buzz')) {
-                $container->getDefinition('liip_multiplex_manager')->replaceArgument(2, $container->getDefinition('liip_multiplex_buzz'));
-            }
+        //switch to the external multiplexer if external requests are enabled
+        if (true == $processedConfig['allow_externals'] && $container->hasDefinition('liip_multiplex_handler')) {
+            $buzz = $container->hasDefinition('buzz') ? $container->getDefinition('buzz') : $container->getDefinition('liip_multiplex_buzz');
+
+            $container->getDefinition('liip_multiplex_handler')->setClass($container->getParameter('liip_multiplex.external_multiplexer.class'));
+            $container->getDefinition('liip_multiplex_handler')->addArgument($buzz);
         }
     }
 
