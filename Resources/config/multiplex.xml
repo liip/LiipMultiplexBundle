@@ -7,7 +7,8 @@
     <parameters>
 
         <parameter key="liip_multiplex.controller.class">Liip\MultiplexBundle\Controller\MultiplexController</parameter>
-        <parameter key="liip_multiplex.manager.class">Liip\MultiplexBundle\Manager\MultiplexManager</parameter>
+        <parameter key="liip_multiplex.internal_multiplexer.class">Liip\MultiplexBundle\Multiplexer\InternalRequestMultiplexer</parameter>
+        <parameter key="liip_multiplex.external_multiplexer.class">Liip\MultiplexBundle\Multiplexer\ExternalRequestMultiplexer</parameter>
 
         <parameter key="liip_multiplex_buzz.client.class">Buzz\Client\Curl</parameter>
         <parameter key="liip_multiplex_buzz.message_factory.class">Buzz\Message\Factory\Factory</parameter>
@@ -17,17 +18,16 @@
 
     <services>
 
-        <service id="liip_multiplex_manager" class="%liip_multiplex.manager.class%">
+        <service id="liip_multiplex_handler" class="%liip_multiplex.internal_multiplexer.class%">
             <argument type="service" id="kernel" />
             <argument type="service" id="router" />
-            <argument type="service" id="buzz" on-invalid="ignore" />
         </service>
 
         <service id="liip_multiplex_controller" class="%liip_multiplex.controller.class%">
-            <argument type="service" id="liip_multiplex_manager" />
+            <argument type="service" id="liip_multiplex_handler" />
         </service>
 
-        <!-- only used if no "buzz" service is available, otherwise use the one from SensioBuzzBundle -->
+        <!-- only used if no "buzz" service is available and external_requests are enabled, otherwise use the one from SensioBuzzBundle -->
         <service id="liip_multiplex_buzz.message_factory" class="%liip_multiplex_buzz.message_factory.class%" public="false" />
         <service id="liip_multiplex_buzz.client" class="%liip_multiplex_buzz.client.class%" public="false" />
 
