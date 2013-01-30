@@ -13,15 +13,13 @@ namespace Liip\MultiplexBundle\Multiplexer;
 use Buzz\Browser;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\Routing\RouterInterface;
 
 /**
- * 
+ * handles external request via buzz
  *
  * @author Robert Schönthal <schoenthal.robert_FR@guj.de>
  */
-class ExternalRequestMultiplexer extends InternalRequestMultiplexer
+class ExternalRequestMultiplexer implements MultiplexerInterface
 {
      /**
       * @var Browser
@@ -31,33 +29,18 @@ class ExternalRequestMultiplexer extends InternalRequestMultiplexer
      /**
       * Constructor
       *
-      * @param HttpKernelInterface $kernel the Symfony Kernel
-      * @param RouterInterface $router the Symfony Router
       * @param Browser $browser the Buzz Browser
       */
-     public function __construct(HttpKernelInterface $kernel, RouterInterface $router, Browser $browser)
+     public function __construct(Browser $browser)
      {
-         parent::__construct($kernel, $router);
-
          $this->browser = $browser;
      }
 
      /**
-      * Handle a single request
-      *
-      * @param Request $request the Symfony Request
-      * @param array $requestInfo array contains 'uri', 'method' and 'query'
-      * @param int $i the current request index
-      * @return array contains 'request', 'status' and 'response'
-      * @throws HttpException if the HTTP Method is not implemented
+      * {inheritDoc}
       */
-     protected function handleRequest(Request $request, array $requestInfo, $i)
+     public function handleRequest(Request $request, array $requestInfo, MultiplexDispatcher $dispatcher)
      {
-         if ($this->isInternalRequest($requestInfo)) {
-             //handle internal requests
-             return parent::handleRequest($request, $requestInfo, $i);
-         }
-
          switch ($requestInfo['method']) {
              case 'GET' :
                  $delimiter = strpos($requestInfo['uri'], '?') === false ? '?' : '&';
@@ -81,14 +64,12 @@ class ExternalRequestMultiplexer extends InternalRequestMultiplexer
          );
      }
 
-     /**
-      * checks if the subRequest is an internal Request which could be handled by our application
-      *
-      * @param array $requestInfo array contains 'uri', 'method' and 'query'
-      * @return boolean if the request can be handled by our application
-      */
-     private function isInternalRequest(array $requestInfo)
-     {
-         return strpos($requestInfo['uri'], '/') === 0;
-     }
+    /**
+     * {inheritDoc}
+     */
+    function supports(array $requestInfo)
+    {
+        //TODO better check for absolute domains
+        return strpos($requestInfo['uri'], '/') != 0;
+    }
 }

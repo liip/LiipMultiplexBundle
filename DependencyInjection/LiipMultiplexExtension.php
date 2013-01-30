@@ -33,39 +33,29 @@ class LiipMultiplexExtension extends Extension
 
         $processedConfig = $this->processConfiguration(new Configuration(), $configs);
 
-        $this->setHandlerConfig($container, $processedConfig);
-
-        //switch to the external multiplexer if external requests are enabled
-        if (true == $processedConfig['allow_externals']) {
-            $this->activateExternalRequests($container);
+        //configure the dispatcher
+        if ($container->hasDefinition('liip_multiplex.dispatcher')) {
+            $container->getDefinition('liip_multiplex.dispatcher')->addMethodCall('displayErrors', array($processedConfig['display_errors']));
         }
-    }
 
-    /**
-     * inject the handler config
-     *
-     * @param ContainerBuilder $container
-     * @param array $processedConfig
-     */
-    private function setHandlerConfig(ContainerBuilder $container, array $processedConfig)
-    {
-        if ($container->hasDefinition('liip_multiplex_handler')) {
-            $container->getDefinition('liip_multiplex_handler')->addMethodCall('setConfig', array($processedConfig));
+        //set config vars for internal request multiplexer
+        if ($container->hasDefinition('liip_multiplex.multiplexer.internal_requests')) {
+            $container->getDefinition('liip_multiplex.multiplexer.internal_requests')->addMethodCall('restrictRoutes', array($processedConfig['restrict_routes']));
+            $container->getDefinition('liip_multiplex.multiplexer.internal_requests')->addMethodCall('setRouteOption', array($processedConfig['route_option']));
         }
-    }
 
-    /**
-     * switch the handler class to enable external request multiplexing if possible (buzz must be enabled)
-     *
-     * @param ContainerBuilder $container
-     */
-    private function activateExternalRequests(ContainerBuilder $container)
-    {
-        if ($container->hasDefinition('liip_multiplex_handler')) {
-            $buzz = $this->checkForBuzzDependency($container);
+        //set config vars for external request multiplexer
+        if ($container->hasDefinition('liip_multiplex.multiplexer.external_requests')) {
+            if(false == $processedConfig['allow_externals']) {
+                $container->removeDefinition('liip_multiplex.multiplexer.external_requests');
+                $container->removeDefinition('liip_multiplex.buzz');
+                $container->removeDefinition('liip_multiplex.buzz.message_factory');
+                $container->removeDefinition('liip_multiplex.buzz.client');
+            } else {
+                $buzz = $this->checkForBuzzDependency($container);
 
-            $container->getDefinition('liip_multiplex_handler')->setClass($container->getParameter('liip_multiplex.external_multiplexer.class'));
-            $container->getDefinition('liip_multiplex_handler')->addArgument($buzz);
+                $container->getDefinition('liip_multiplex.multiplexer.external_requests')->replaceArgument(0, $buzz);
+            }
         }
     }
 
@@ -81,10 +71,11 @@ class LiipMultiplexExtension extends Extension
     private function checkForBuzzDependency(ContainerBuilder $container)
     {
         if (!class_exists($container->getParameter('liip_multiplex_buzz.browser.class'))) {
-            throw new ServiceNotFoundException('buzz', 'liip_multiplex_handler');
+
+            throw new ServiceNotFoundException('buzz', 'liip_multiplex.multiplexer.external_requests');
         }
 
-        return $container->hasDefinition('buzz') ? $container->getDefinition('buzz') : $container->getDefinition('liip_multiplex_buzz');
+        return $container->hasDefinition('buzz') ? $container->getDefinition('buzz') : $container->getDefinition('liip_multiplex.multiplexer.external_requests');
     }
 
 

@@ -19,5 +19,22 @@ use Symfony\Component\HttpFoundation\Request;
  */
 interface MultiplexerInterface
 {
-    function multiplex(Request $request, $format = null);
+    /**
+     * handles a single Request
+     *
+     * @param Request $request
+     * @param string $format
+     * @param MultiplexDispatcher $dispatcher
+     * @return Response
+     * @throws HttpExceptionInterface
+     */
+    function handleRequest(Request $request, array $requestInfo, MultiplexDispatcher $dispatcher);
+
+    /**
+     * checks if this multiplexer can handle this request
+     *
+     * @param array $requestInfo
+     * @return boolean
+     */
+    function supports(array $requestInfo);
 }
