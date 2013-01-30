@@ -56,14 +56,12 @@ class MultiplexManager
     /**
      * Constructor
      *
-     * @param Request $request the Symfony Request
      * @param HttpKernelInterface $kernel the Symfony Kernel
      * @param RouterInterface $router the Symfony Router
      * @param Browser $browser the Buzz Browser
      */
-    public function __construct(Request $request, HttpKernelInterface $kernel, RouterInterface $router, Browser $browser)
+    public function __construct(HttpKernelInterface $kernel, RouterInterface $router, Browser $browser)
     {
-        $this->request = $request;
         $this->kernel = $kernel;
         $this->router = $router;
         $this->browser = $browser;
@@ -76,20 +74,27 @@ class MultiplexManager
      *                          display_errors = show exception error messages
      *                          route_option = the route option to be used for restriction checks
      *                          restrict_routes = restrict calling of routes on the ones with the route-option
+     *                          allow_externals = if external requests should be possible
+     * @return MultiplexManager
      */
     public function setConfig(array $config)
     {
         $this->config = array_merge($this->config, $config);
+
+        return $this;
     }
 
     /**
      * starts the multiplexing of sub-requests
      *
+     * @param Request $request the Symfony Request
      * @param string $format the format to return (html|json)
      * @return Response the combined responses
      */
-    public function multiplex($format = 'json')
+    public function multiplex(Request $request, $format = 'json')
     {
+        $this->request = $request;
+
         $requests = $this->request->get('requests');
         $responses = $this->processRequests($requests ? $requests : array());
 

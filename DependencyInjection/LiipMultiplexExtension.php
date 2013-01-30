@@ -37,7 +37,7 @@ class LiipMultiplexExtension extends Extension
 
             //replace buzz with own buzz-service if not available
             if (!$container->hasDefinition('buzz')) {
-                $container->getDefinition('liip_multiplex_manager')->replaceArgument(3, $container->getDefinition('multiplex_buzz'));
+                $container->getDefinition('liip_multiplex_manager')->replaceArgument(2, $container->getDefinition('multiplex_buzz'));
             }
         }
     }

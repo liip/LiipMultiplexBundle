@@ -17,8 +17,7 @@
 
     <services>
 
-        <service id="liip_multiplex_manager" class="%liip_multiplex.manager.class%" scope="request">
-            <argument type="service" id="request" />
+        <service id="liip_multiplex_manager" class="%liip_multiplex.manager.class%">
             <argument type="service" id="kernel" />
             <argument type="service" id="router" />
             <argument type="service" id="buzz" />

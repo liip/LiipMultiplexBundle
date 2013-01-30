@@ -23,33 +23,32 @@ class MultiplexManagerTest extends \PHPUnit_Framework_TestCase
         $this->router = $this->getMockBuilder('Symfony\Component\Routing\RouterInterface')->disableOriginalConstructor()->getMock();
         $this->browser = $this->getMockBuilder('Buzz\Browser')->getMock();
 
-        $this->manager = new MultiplexManager($this->request, $this->kernel, $this->router, $this->browser);
+        $this->manager = new MultiplexManager($this->kernel, $this->router, $this->browser);
     }
 
     public function testConstructor()
     {
-        $this->assertAttributeSame($this->request, 'request', $this->manager);
         $this->assertAttributeSame($this->kernel, 'kernel', $this->manager);
         $this->assertAttributeSame($this->router, 'router', $this->manager);
     }
 
     public function testMultiplexWithDefaults()
     {
-        $response = $this->manager->multiplex();
+        $response = $this->manager->multiplex($this->request);
 
         $this->assertEquals('{"responses":[]}', $response->getContent());
     }
 
     public function testMultiplexWithJson()
     {
-        $response = $this->manager->multiplex('json');
+        $response = $this->manager->multiplex($this->request, 'json');
 
         $this->assertEquals('{"responses":[]}', $response->getContent());
     }
 
     public function testMultiplexWithHtml()
     {
-        $response = $this->manager->multiplex('html');
+        $response = $this->manager->multiplex($this->request, 'html');
 
         $this->assertEquals("<pre>array (\n  'responses' => \n  array (\n  ),\n)</pre>", $response->getContent());
     }
@@ -88,7 +87,7 @@ class MultiplexManagerTest extends \PHPUnit_Framework_TestCase
             'display_errors' => true
         ));
 
-        $response = $this->manager->multiplex('json');
+        $response = $this->manager->multiplex($this->request, 'json');
         $this->assertEquals('{"responses":{"":{"status":500,"response":"no uri given for index: 0"},"http:\/\/google.com":{"status":400,"response":"external calls are not enabled"},"\/":{"status":403,"response":"route not able to be multiplexed"},"\/foobar":{"status":404,"response":"uri did not match a route for path: \/foobar"}}}', $response->getContent());
 
         //with error messages off
@@ -98,7 +97,7 @@ class MultiplexManagerTest extends \PHPUnit_Framework_TestCase
             'display_errors' => false
         ));
 
-        $response = $this->manager->multiplex('json');
+        $response = $this->manager->multiplex($this->request, 'json');
         $this->assertEquals('{"responses":{"":{"status":500,"response":"Internal Server Error"},"http:\/\/google.com":{"status":400,"response":"Bad Request"},"\/":{"status":403,"response":"Forbidden"},"\/foobar":{"status":404,"response":"Not Found"}}}', $response->getContent());
     }
 
@@ -134,7 +133,7 @@ class MultiplexManagerTest extends \PHPUnit_Framework_TestCase
             ->method('handle')
             ->will($this->returnValue($subResponse));
 
-        $response = $this->manager->multiplex();
+        $response = $this->manager->multiplex($this->request);
         $this->assertEquals('{"responses":{"\/test\/uri":{"request":"\/test\/uri","status":200,"response":"sub content"}}}', $response->getContent());
     }
 
@@ -154,7 +153,7 @@ class MultiplexManagerTest extends \PHPUnit_Framework_TestCase
         $this->browser->expects($this->atLeastOnce())->method('get')->will($this->returnValue($getResponse));
         $this->browser->expects($this->atLeastOnce())->method('submit')->will($this->returnValue($postResponse));
 
-        $response = $this->manager->multiplex();
+        $response = $this->manager->multiplex($this->request);
         $this->assertEquals('{"responses":{"http:\/\/google.de":{"request":"http:\/\/google.de","status":null,"response":"foo"},"http:\/\/google.com":{"request":"http:\/\/google.com","status":null,"response":"bar"}}}', $response->getContent());
     }
 
@@ -218,7 +217,7 @@ class MultiplexManagerTest extends \PHPUnit_Framework_TestCase
             ->method('handle')
             ->will($this->returnValue($subResponseB));
 
-        $response = $this->manager->multiplex();
+        $response = $this->manager->multiplex($this->request);
         $this->assertEquals('{"responses":{"\/test\/uri":{"request":"\/test\/uri","status":200,"response":"sub content A"},"\/uri\/test":{"request":"\/uri\/test","status":null,"response":"sub content B"}}}', $response->getContent());
     }
 
