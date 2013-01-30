@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<phpunit bootstrap="./Tests/bootstrap.php" color="true">
-  <php>
-    <server name="SYMFONY" value="../../../symfony/src" />
-  </php>
+<phpunit bootstrap="./Tests/bootstrap.php" colors="true">
 
   <testsuites>
-    <testsuite name="LiipMultiplexBundle">
+    <testsuite name="LiipMultiplexBundle Test-Suite">
       <directory suffix="Test.php">./Tests</directory>
     </testsuite>
   </testsuites>
@@ -15,7 +12,10 @@
     <whitelist>
       <directory>./</directory>
       <exclude>
-        <directory>./Tests</directory>
+          <directory>./Resources</directory>
+          <directory>./Tests</directory>
+          <directory>./vendor</directory>
+          <directory>./FunctionalTests</directory>
       </exclude>
     </whitelist>
   </filter>
