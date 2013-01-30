@@ -102,7 +102,7 @@ Integration of the Javascript
   {% endjavascripts %}
 ```
 
-Using the `Multiplexer`
+Using the Javascript `Multiplexer`
 ------------------------------------
 
 ``` javascript
@@ -140,7 +140,7 @@ Tests
   1. To run the unit tests, require all dependencies
 
     ```
-    $ php composer.phar update
+    $ php composer.phar update --dev
     ```
 
   2. Run PHPUnit
