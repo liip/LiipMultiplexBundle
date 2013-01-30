@@ -27,6 +27,7 @@ class MultiplexController
     /**
      * Handle the the multiplexing
      *
+     * @param Request $request the Symfony Request
      * @return Response
      */
     public function indexAction(Request $request)
