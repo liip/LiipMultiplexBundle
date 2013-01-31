@@ -22,11 +22,13 @@ class AddMultiplexerPass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         if (!$container->hasDefinition('liip_multiplex.dispatcher')) {
-            $multiplexers = $container->findTaggedServiceIds('liip_multiplexer');
+            return;
+        }
 
-            foreach ($multiplexers as $id => $multiplexer) {
-                $container->getDefinition('liip_multiplex.dispatcher')->addMethodCall('addMultiplexer', array(new Reference($id)));
-            }
+        $multiplexers = $container->findTaggedServiceIds('liip_multiplexer');
+
+        foreach ($multiplexers as $id => $multiplexer) {
+            $container->getDefinition('liip_multiplex.dispatcher')->addMethodCall('addMultiplexer', array(new Reference($id)));
         }
     }
 }
