@@ -14,7 +14,7 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        $this->manager = $this->getMockBuilder('Liip\MultiplexBundle\Multiplexer\InternalRequestMultiplexer')
+        $this->dispatcher = $this->getMockBuilder('Liip\MultiplexBundle\Multiplexer\MultiplexDispatcher')
             ->setMethods(array('multiplex'))
             ->disableOriginalConstructor()
             ->getMock();
@@ -22,21 +22,21 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
 
     public function testConstructor()
     {
-        $controller = new MultiplexController($this->manager);
+        $controller = new MultiplexController($this->dispatcher);
 
-        $this->assertAttributeSame($this->manager, 'manager', $controller);
+        $this->assertAttributeSame($this->dispatcher, 'dispatcher', $controller);
     }
 
     public function testIndexActionWithJson()
     {
-        $controller = new MultiplexController($this->manager);
+        $controller = new MultiplexController($this->dispatcher);
         $request = new Request();
         $request->setRequestFormat('json');
 
         if (class_exists('Symfony\Component\HttpFoundation\JsonResponse')) {
-            $this->manager->expects($this->atLeastOnce())->method('multiplex')->will($this->returnValue(new JsonResponse(array('foo' => 'bar'))));
+            $this->dispatcher->expects($this->atLeastOnce())->method('multiplex')->will($this->returnValue(new JsonResponse(array('foo' => 'bar'))));
         } else {
-            $this->manager->expects($this->atLeastOnce())->method('multiplex')->will($this->returnValue(new Response(json_encode(array('foo' => 'bar')))));
+            $this->dispatcher->expects($this->atLeastOnce())->method('multiplex')->will($this->returnValue(new Response(json_encode(array('foo' => 'bar')))));
         }
 
         $response = $controller->indexAction($request);
@@ -47,11 +47,11 @@ class MultiplexControllerTest extends \PHPUnit_Framework_TestCase
 
     public function testIndexActionWithHtml()
     {
-        $controller = new MultiplexController($this->manager);
+        $controller = new MultiplexController($this->dispatcher);
         $request = new Request();
         $request->setRequestFormat('html');
 
-        $this->manager->expects($this->atLeastOnce())->method('multiplex')->will($this->returnValue(new Response('<pre>foo</pre>')));
+        $this->dispatcher->expects($this->atLeastOnce())->method('multiplex')->will($this->returnValue(new Response('<pre>foo</pre>')));
 
         $response = $controller->indexAction($request);
 

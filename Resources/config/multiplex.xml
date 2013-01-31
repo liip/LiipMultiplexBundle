@@ -7,6 +7,8 @@
     <parameters>
 
         <parameter key="liip_multiplex.controller.class">Liip\MultiplexBundle\Controller\MultiplexController</parameter>
+        <parameter key="liip_multiplex.dispatcher.class">Liip\MultiplexBundle\Multiplexer\MultiplexDispatcher</parameter>
+
         <parameter key="liip_multiplex.internal_multiplexer.class">Liip\MultiplexBundle\Multiplexer\InternalRequestMultiplexer</parameter>
         <parameter key="liip_multiplex.external_multiplexer.class">Liip\MultiplexBundle\Multiplexer\ExternalRequestMultiplexer</parameter>
 
@@ -18,22 +20,31 @@
 
     <services>
 
-        <service id="liip_multiplex_handler" class="%liip_multiplex.internal_multiplexer.class%">
-            <argument type="service" id="kernel" />
-            <argument type="service" id="router" />
+        <service id="liip_multiplex.controller" class="%liip_multiplex.controller.class%">
+            <argument type="service" id="liip_multiplex.dispatcher" />
         </service>
 
-        <service id="liip_multiplex_controller" class="%liip_multiplex.controller.class%">
-            <argument type="service" id="liip_multiplex_handler" />
+        <service id="liip_multiplex.dispatcher" class="%liip_multiplex.dispatcher.class%">
+        </service>
+
+        <service id="liip_multiplex.multiplexer.internal_requests" class="%liip_multiplex.internal_multiplexer.class%">
+            <argument type="service" id="kernel" />
+            <argument type="service" id="router" />
+            <tag name="liip_multiplexer" />
+        </service>
+
+        <service id="liip_multiplex.multiplexer.external_requests" class="%liip_multiplex.internal_multiplexer.class%">
+            <argument type="service" id="buzz" on-invalid="ignore" />
+            <tag name="liip_multiplexer" />
         </service>
 
         <!-- only used if no "buzz" service is available and external_requests are enabled, otherwise use the one from SensioBuzzBundle -->
-        <service id="liip_multiplex_buzz.message_factory" class="%liip_multiplex_buzz.message_factory.class%" public="false" />
-        <service id="liip_multiplex_buzz.client" class="%liip_multiplex_buzz.client.class%" public="false" />
+        <service id="liip_multiplex.buzz.message_factory" class="%liip_multiplex_buzz.message_factory.class%" public="false" />
+        <service id="liip_multiplex.buzz.client" class="%liip_multiplex_buzz.client.class%" public="false" />
 
-        <service id="liip_multiplex_buzz" class="%liip_multiplex_buzz.browser.class%">
-            <argument type="service" id="liip_multiplex_buzz.client" />
-            <argument type="service" id="liip_multiplex_buzz.message_factory" />
+        <service id="liip_multiplex.buzz" class="%liip_multiplex_buzz.browser.class%">
+            <argument type="service" id="liip_multiplex.buzz.client" />
+            <argument type="service" id="liip_multiplex.buzz.message_factory" />
         </service>
 
     </services>
