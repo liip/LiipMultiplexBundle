@@ -14,66 +14,57 @@ class ExternalRequestMultiplexerTest extends \PHPUnit_Framework_TestCase
     /**
      * ExternalRequestMultiplexer
      */
-    protected $manager;
+    protected $multiplexer;
 
     public function setUp()
     {
-        $this->request = $this->getMockBuilder('Symfony\Component\HttpFoundation\Request')->disableOriginalConstructor()->getMock();
-        $this->kernel = $this->getMockBuilder('Symfony\Component\HttpKernel\Kernel')->disableOriginalConstructor()->getMock();
-        $this->router = $this->getMockBuilder('Symfony\Component\Routing\RouterInterface')->disableOriginalConstructor()->getMock();
         $this->browser = $this->getMockBuilder('Buzz\Browser')->getMock();
-        $this->request->expects($this->any())->method('getRequestFormat')->will($this->returnValue('json'));
+        $this->request = $this->getMockBuilder('Symfony\Component\HttpFoundation\Request')->disableOriginalConstructor()->getMock();
 
-        $this->manager = new ExternalRequestMultiplexer($this->kernel, $this->router, $this->browser);
+        $this->multiplexer = new ExternalRequestMultiplexer($this->browser);
+        $this->dispatcher = $this->getMock('Liip\MultiplexBundle\Multiplexer\MultiplexDispatcher');
     }
 
-    public function testMultiplexWithExternalRequests()
+    public function testSupports()
     {
-        $this->multiplexFixture(array(
-            array('uri' => 'http://google.de', 'method' => null, 'parameters' => null),
-            array('uri' => 'http://google.com', 'method' => 'POST', 'parameters' => array('q' => 'foo')),
-        ));
+        $this->assertTrue($this->multiplexer->supports(array('uri' => 'http://google.com')));
+        $this->assertTrue($this->multiplexer->supports(array('uri' => 'https://google.com')));
+        $this->assertFalse($this->multiplexer->supports(array('uri' => '/')));
+    }
+
+    public function testHandleGetRequest()
+    {
+        $request = array('uri' => 'http://google.de', 'method' => 'GET', 'parameters' => array());
 
         $getResponse = new Response();
         $getResponse->setContent('foo');
 
+        $this->browser->expects($this->atLeastOnce())->method('get')->will($this->returnValue($getResponse));
+
+        $response = $this->multiplexer->handleRequest($this->request, $request, $this->dispatcher);
+        $this->assertEquals(array('request'=>'http://google.de', 'status'=>null, 'response' => 'foo'), $response);
+    }
+
+    public function testHandlePostRequest()
+    {
+        $request = array('uri' => 'http://google.com', 'method' => 'POST', 'parameters' => array('q' => 'foo'));
+
         $postResponse = new Response();
         $postResponse->setContent('bar');
 
-        $this->browser->expects($this->atLeastOnce())->method('get')->will($this->returnValue($getResponse));
         $this->browser->expects($this->atLeastOnce())->method('submit')->will($this->returnValue($postResponse));
 
-        $response = $this->manager->multiplex($this->request);
-        $this->assertEquals('{"responses":{"http:\/\/google.de":{"request":"http:\/\/google.de","status":null,"response":"foo"},"http:\/\/google.com":{"request":"http:\/\/google.com","status":null,"response":"bar"}}}', $response->getContent());
+        $response = $this->multiplexer->handleRequest($this->request, $request, $this->dispatcher);
+        $this->assertEquals(array('request'=>'http://google.com', 'status'=>null, 'response' => 'bar'), $response);
     }
 
-    public function testMultiplexWithUnknownFormatExternalRequests()
+    /**
+     * @expectedException Symfony\Component\HttpKernel\Exception\HttpException
+     */
+    public function testHandleUnknownRequestFormat()
     {
-        $this->multiplexFixture(array(
-            array('uri' => 'http://google.de', 'method' => 'PUT', 'parameters' => null),
-        ));
+        $request = array('uri' => 'http://google.de', 'method' => 'PUT', 'parameters' => null);
 
-        $response = $this->manager->multiplex($this->request);
-        $this->assertEquals('{"responses":{"http:\/\/google.de":{"status":501,"response":"HTTP Method PUT not implemented yet"}}}', $response->getContent());
+        $this->multiplexer->handleRequest($this->request, $request, $this->dispatcher);
     }
-
-    private function multiplexFixture($requests = null)
-    {
-        $this->request->expects($this->atLeastOnce())
-            ->method('get')
-            ->with('requests')
-            ->will($this->returnValue($requests));
-
-        $this->request->expects($this->any())
-            ->method('getScriptName')
-            ->with()
-            ->will($this->returnValue(''));
-
-        $session = $this->getMockBuilder('Symfony\Component\HttpFoundation\Session\Session')->disableOriginalConstructor()->getMock();
-        $this->request->expects($this->any())
-            ->method('getSession')
-            ->with()
-            ->will($this->returnValue($session));
-    }
-
 }

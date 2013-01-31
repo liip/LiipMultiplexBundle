@@ -29,38 +29,25 @@ class MultiplexBundleExtensionTest extends \PHPUnit_Framework_TestCase
         $this->assertGreaterThan(0, count($resources));
 
         $expectedServices = array(
-            'liip_multiplex_controller',
-            'liip_multiplex_handler'
+            'liip_multiplex.controller',
+            'liip_multiplex.dispatcher',
+            'liip_multiplex.multiplexer.internal_requests',
+            'liip_multiplex.multiplexer.external_requests'
         );
 
         foreach ($expectedServices as $serviceId) {
             $this->assertTrue($container->hasDefinition($serviceId), $serviceId);
         }
-
-        //test default config
-        $calls = $container->getDefinition('liip_multiplex_handler')->getMethodCalls();
-        $this->assertGreaterThan(0, count($calls));
-        $this->assertContains('setConfig', $calls[0]);
-        $this->assertEquals(array(
-            'display_errors' => true,
-            'restrict_routes' => false,
-            'allow_externals' => true,
-            'route_option' => 'multiplex_expose'
-        ), $calls[0][1][0]);
     }
 
-    public function testLoadWithExternalMultiplexer()
+    public function testLoadWithoutExternals()
     {
         $container = new ContainerBuilder();
         $extension = new LiipMultiplexExtension();
 
-        $extension->load(array(array(
-            'allow_externals' => true
-        )), $container);
+        $extension->load(array(array('allow_externals' => false)), $container);
 
-        $class = $container->getDefinition('liip_multiplex_handler')->getClass();
-
-        $this->assertEquals('Liip\MultiplexBundle\Multiplexer\ExternalRequestMultiplexer', $class);
+        $this->assertFalse($container->hasDefinition('liip_multiplex.multiplexer.external_requests'));
     }
 
     public function testXsdValidationBasePath()

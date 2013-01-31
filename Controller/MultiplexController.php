@@ -11,17 +11,20 @@
 
 namespace Liip\MultiplexBundle\Controller;
 
-use Liip\MultiplexBundle\Multiplexer\MultiplexerInterface;
+use Liip\MultiplexBundle\Multiplexer\MultiplexDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class MultiplexController
 {
-    private $manager;
+    /**
+     * @var MultiplexDispatcher
+     */
+    private $dispatcher;
 
-    public function __construct(MultiplexerInterface $manager)
+    public function __construct(MultiplexDispatcher $dispatcher)
     {
-        $this->manager = $manager;
+        $this->dispatcher = $dispatcher;
     }
 
     /**
@@ -32,6 +35,6 @@ class MultiplexController
      */
     public function indexAction(Request $request)
     {
-        return $this->manager->multiplex($request);
+        return $this->dispatcher->multiplex($request);
     }
 }
