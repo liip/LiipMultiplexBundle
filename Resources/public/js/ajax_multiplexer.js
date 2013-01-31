@@ -71,9 +71,9 @@ Multiplexer = (function () {
         if ('json' == requestFormat) {
             $.each(data, function (uri, response) {
                 if (response.status < 400) {
-                    requests[response.request].success(response.response);
+                    requests[uri].success(response.response);
                 } else {
-                    requests[response.request].error(response.response);
+                    requests[uri].error(response.response);
                 }
             });
         } else {
