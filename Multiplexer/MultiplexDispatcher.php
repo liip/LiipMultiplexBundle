@@ -94,7 +94,7 @@ class MultiplexDispatcher
             $code = $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500;
 
             $message = $this->displayErrors ? $e->getMessage() : Response::$statusTexts[$code];
-            $response[$requestInfo['uri']] = array('status' => $code, 'response' => $message);
+            $response[$requestInfo['uri']] = array('request' => $requestInfo['uri'], 'status' => $code, 'response' => $message);
         }
 
         return $response;
@@ -148,9 +148,6 @@ class MultiplexDispatcher
         if (empty($requestInfo['uri'])) {
             throw new \InvalidArgumentException('no uri given');
         }
-
-        //TODO only belongs to internal requests?!
-        $requestInfo['uri'] = preg_replace('/^(' . preg_quote($request->getScriptName(), '/') . ')?/', '', $requestInfo['uri']);
 
         $requestInfo['method'] = empty($requestInfo['method']) ? 'GET' : strtoupper($requestInfo['method']);
 
