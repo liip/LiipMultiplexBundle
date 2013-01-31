@@ -69,7 +69,7 @@ Multiplexer = (function () {
      */
     function onSuccess(data, status, xhr) {
         if ('json' == requestFormat) {
-            $.each(data.responses, function (uri, response) {
+            $.each(data, function (uri, response) {
                 if (response.status < 400) {
                     requests[response.request].success(response.response);
                 } else {

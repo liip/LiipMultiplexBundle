@@ -28,7 +28,7 @@ interface MultiplexerInterface
      * @return Response
      * @throws HttpExceptionInterface
      */
-    function handleRequest(Request $request, array $requestInfo, MultiplexDispatcher $dispatcher);
+    public function handleRequest(Request $request, array $requestInfo, MultiplexDispatcher $dispatcher);
 
     /**
      * checks if this multiplexer can handle this request
@@ -36,5 +36,5 @@ interface MultiplexerInterface
      * @param array $requestInfo
      * @return boolean
      */
-    function supports(array $requestInfo);
+    public function supports(array $requestInfo);
 }

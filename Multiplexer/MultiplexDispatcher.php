@@ -62,9 +62,9 @@ class MultiplexDispatcher
      */
     public function multiplex(Request $request, $format = null)
     {
-        $format = $format ?: $request->getRequestFormat();
+        $format = $format ? : $request->getRequestFormat();
 
-        $requests = (array) $request->get('requests', array());
+        $requests = (array)$request->get('requests', array());
         $responses = array();
 
         foreach ($requests as $i => $requestInfo) {
@@ -109,7 +109,7 @@ class MultiplexDispatcher
     {
         foreach ($this->multiplexers as $multiplexer) {
             /* @var MultiplexerInterface $multiplexer */
-            if($multiplexer->supports($requestInfo)) {
+            if ($multiplexer->supports($requestInfo)) {
 
                 return $multiplexer;
             }
@@ -128,11 +128,13 @@ class MultiplexDispatcher
     protected function buildResponse(array $responses, $format)
     {
         switch ($format) {
-            case 'json' : return new JsonResponse($responses);
-            case 'html' : return new Response('<pre>' . var_export($responses, true) . '</pre>');
+            case 'json' :
+                return new JsonResponse($responses);
+            case 'html' :
+                return new Response('<pre>' . var_export($responses, true) . '</pre>');
         }
 
-        throw new HttpException(501, 'Response format '.$format.' not yet implemented');
+        throw new HttpException(501, 'Response format ' . $format . ' not yet implemented');
     }
 
     /**

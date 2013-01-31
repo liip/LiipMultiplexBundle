@@ -46,7 +46,7 @@ class LiipMultiplexExtension extends Extension
 
         //set config vars for external request multiplexer
         if ($container->hasDefinition('liip_multiplex.multiplexer.external_requests')) {
-            if(false == $processedConfig['allow_externals']) {
+            if (false == $processedConfig['allow_externals']) {
                 $container->removeDefinition('liip_multiplex.multiplexer.external_requests');
                 $container->removeDefinition('liip_multiplex.buzz');
                 $container->removeDefinition('liip_multiplex.buzz.message_factory');
