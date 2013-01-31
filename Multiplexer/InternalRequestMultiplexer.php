@@ -86,6 +86,8 @@ class InternalRequestMultiplexer implements MultiplexerInterface
      */
     public function handleRequest(Request $request, array $requestInfo, MultiplexDispatcher $dispatcher)
     {
+        $requestInfo['uri'] = preg_replace('/^(' . preg_quote($request->getScriptName(), '/') . ')?/', '', $requestInfo['uri']);
+
         $subRequest = Request::create($requestInfo['uri'], $requestInfo['method'], $requestInfo['parameters']);
         $subRequest->setSession($request->getSession());
 
