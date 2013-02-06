@@ -3,6 +3,7 @@
 namespace Liip\MultiplexBundle\Tests\Multiplexer;
 
 use Liip\MultiplexBundle\Multiplexer\InternalRequestMultiplexer;
+use Symfony\Component\Routing\RequestContext;
 
 /**
  * @covers Liip\MultiplexBundle\Multiplexer\InternalRequestMultiplexer<extended>
@@ -26,6 +27,10 @@ class InternalRequestMultiplexerTest extends \PHPUnit_Framework_TestCase
             ->with()
             ->will($this->returnValue($session));
 
+        $context = new RequestContext();
+        $context->fromRequest($this->request);
+
+        $this->router->expects($this->any())->method('getContext')->will($this->returnValue($context));
         $this->multiplexer = new InternalRequestMultiplexer($this->kernel, $this->router);
         $this->dispatcher = $this->getMock('Liip\MultiplexBundle\Multiplexer\MultiplexDispatcher');
     }

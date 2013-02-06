@@ -6,6 +6,8 @@ use Liip\MultiplexBundle\Multiplexer\MultiplexDispatcher;
 use Liip\MultiplexBundle\Multiplexer\InternalRequestMultiplexer;
 use Liip\MultiplexBundle\Multiplexer\ExternalRequestMultiplexer;
 use Buzz\Message\Response;
+use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * @covers Liip\MultiplexBundle\Multiplexer\MultiplexDispatcher
@@ -26,6 +28,10 @@ class MultiplexerDispatcherTest extends \PHPUnit_Framework_TestCase
             ->method('getSession')
             ->with()
             ->will($this->returnValue($session));
+        $this->request->expects($this->any())
+            ->method('getSession')
+            ->with()
+            ->will($this->returnValue($session));
 
         $this->manager = new MultiplexDispatcher();
     }
@@ -35,7 +41,13 @@ class MultiplexerDispatcherTest extends \PHPUnit_Framework_TestCase
         $response = $this->manager->multiplex($this->request);
 
         $this->assertInstanceOf('Symfony\Component\HttpFoundation\JsonResponse', $response);
-        $this->assertEquals('[]', $response->getContent());
+
+        //see https://github.com/symfony/symfony/commit/2d07a17cbd839b52e547cb80e148f810795c23a1
+        if (-1 == version_compare(Kernel::VERSION, '2.2', '<=')) {
+            $this->assertEquals('{}', $response->getContent());
+        } else {
+            $this->assertEquals('[]', $response->getContent());
+        }
     }
 
     public function testMultiplexWithJson()
@@ -43,7 +55,13 @@ class MultiplexerDispatcherTest extends \PHPUnit_Framework_TestCase
         $response = $this->manager->multiplex($this->request, 'json');
 
         $this->assertInstanceOf('Symfony\Component\HttpFoundation\JsonResponse', $response);
-        $this->assertEquals('[]', $response->getContent());
+
+        //see https://github.com/symfony/symfony/commit/2d07a17cbd839b52e547cb80e148f810795c23a1
+        if (-1 == version_compare(Kernel::VERSION, '2.2', '<=')) {
+            $this->assertEquals('{}', $response->getContent());
+        } else {
+            $this->assertEquals('[]', $response->getContent());
+        }
     }
 
     public function testMultiplexWithHtml()
@@ -82,8 +100,13 @@ class MultiplexerDispatcherTest extends \PHPUnit_Framework_TestCase
 
         //internal multiplexer
         $kernel = $this->getMockBuilder('Symfony\Component\HttpKernel\Kernel')->disableOriginalConstructor()->getMock();
-        $router = $this->getMockBuilder('Symfony\Component\Routing\RouterInterface')->disableOriginalConstructor()->getMock();
-        $router->expects($this->at(0))->method('match')->with('/foobar')->will($this->returnValue(array('_route'=>'foo')));
+        $router = $this->getMockBuilder('Symfony\Component\Routing\Router')->disableOriginalConstructor()->getMock();
+        $router->expects($this->atLeastOnce())->method('match')->with('/foobar')->will($this->returnValue(array('_route'=>'foo')));
+
+        $context = new RequestContext();
+        $context->fromRequest($this->request);
+        $router->expects($this->atLeastOnce())->method('getContext')->will($this->returnValue($context));
+
         $subResponse = $this->getMockBuilder('Symfony\Component\HttpFoundation\Response')->disableOriginalConstructor()->getMock();
         $subResponse->expects($this->once())->method('getContent')->with()->will($this->returnValue('foo'));
 
@@ -112,11 +135,16 @@ class MultiplexerDispatcherTest extends \PHPUnit_Framework_TestCase
 
         //internal multiplexer
         $kernel = $this->getMockBuilder('Symfony\Component\HttpKernel\Kernel')->disableOriginalConstructor()->getMock();
-        $router = $this->getMockBuilder('Symfony\Component\Routing\RouterInterface')->disableOriginalConstructor()->getMock();
-        $router->expects($this->at(0))->method('match')->with('/foobar')->will($this->returnValue(false));
-        $this->manager->addMultiplexer(new InternalRequestMultiplexer($kernel, $router));
+        $router = $this->getMockBuilder('Symfony\Component\Routing\Router')->disableOriginalConstructor()->getMock();
+        $router->expects($this->atLeastOnce())->method('match')->with('/foobar')->will($this->returnValue(false));
 
+        $context = new RequestContext();
+        $context->fromRequest($this->request);
+        $router->expects($this->atLeastOnce())->method('getContext')->will($this->returnValue($context));
+
+        $this->manager->addMultiplexer(new InternalRequestMultiplexer($kernel, $router));
         $this->manager->displayErrors(false);
+
         $response = $this->manager->multiplex($this->request);
         $this->assertEquals('{"":{"request":"","status":500,"response":"Internal Server Error"},"http:\/\/google.com":{"request":"http:\/\/google.com","status":501,"response":"Not Implemented"},"\/foobar":{"request":"\/foobar","status":404,"response":"Not Found"}}', $response->getContent());
     }

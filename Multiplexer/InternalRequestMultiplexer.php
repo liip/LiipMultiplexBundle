@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
@@ -90,6 +91,11 @@ class InternalRequestMultiplexer implements MultiplexerInterface
 
         $subRequest = Request::create($requestInfo['uri'], $requestInfo['method'], $requestInfo['parameters']);
         $subRequest->setSession($request->getSession());
+
+        //set the correct router context
+        $routerContext = $this->router->getContext();
+        $routerContext->fromRequest($subRequest);
+        $this->router->setContext($routerContext);
 
         if (false === ($parameters = $this->router->match($subRequest->getPathInfo()))) {
             throw new NotFoundHttpException('uri did not match a route for path: ' . $subRequest->getPathInfo());
