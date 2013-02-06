@@ -7,6 +7,7 @@ use Liip\MultiplexBundle\Multiplexer\InternalRequestMultiplexer;
 use Liip\MultiplexBundle\Multiplexer\ExternalRequestMultiplexer;
 use Buzz\Message\Response;
 use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\HttpKernel\Kernel;
 
 /**
  * @covers Liip\MultiplexBundle\Multiplexer\MultiplexDispatcher
@@ -40,7 +41,13 @@ class MultiplexerDispatcherTest extends \PHPUnit_Framework_TestCase
         $response = $this->manager->multiplex($this->request);
 
         $this->assertInstanceOf('Symfony\Component\HttpFoundation\JsonResponse', $response);
-        $this->assertEquals('[]', $response->getContent());
+
+        //see https://github.com/symfony/symfony/commit/2d07a17cbd839b52e547cb80e148f810795c23a1
+        if (-1 == version_compare(Kernel::VERSION, '2.2', '<=')) {
+            $this->assertEquals('{}', $response->getContent());
+        } else {
+            $this->assertEquals('[]', $response->getContent());
+        }
     }
 
     public function testMultiplexWithJson()
@@ -48,7 +55,13 @@ class MultiplexerDispatcherTest extends \PHPUnit_Framework_TestCase
         $response = $this->manager->multiplex($this->request, 'json');
 
         $this->assertInstanceOf('Symfony\Component\HttpFoundation\JsonResponse', $response);
-        $this->assertEquals('[]', $response->getContent());
+
+        //see https://github.com/symfony/symfony/commit/2d07a17cbd839b52e547cb80e148f810795c23a1
+        if (-1 == version_compare(Kernel::VERSION, '2.2', '<=')) {
+            $this->assertEquals('{}', $response->getContent());
+        } else {
+            $this->assertEquals('[]', $response->getContent());
+        }
     }
 
     public function testMultiplexWithHtml()
