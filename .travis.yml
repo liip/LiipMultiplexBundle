@@ -9,7 +9,8 @@ env:
   - SYMFONY_VERSION=dev-master
 
 before_script:
-  - composer require symfony/framework-bundle:${SYMFONY_VERSION} --prefer-source --dev
+  - composer require symfony/framework-bundle:${SYMFONY_VERSION} --no-update
+  - composer install --prefer-source --dev
 
 script: phpunit --coverage-text
 
