@@ -45,10 +45,24 @@ Multiplexer = (function () {
         return {'requests': prepared};
     }
 
+    function determineRequestMethod()
+    {
+        var method = 'GET';
+
+        $.each(requests, function (index, current) {
+            if (typeof current.request.method != 'undefined' && current.request.method != 'GET') {
+                method = 'POST';
+            }
+        });
+
+        return method;
+    }
+
     function callMasterRequest(filter, successCallback, errorCallback) {
-        $.ajax(multiplexerEndpoint, {
+        return $.ajax(multiplexerEndpoint, {
             cache: false,
             data: preparedRequests(filter ? filter : []),
+            type: determineRequestMethod(),
             dataType: requestFormat,
             error: (errorCallback ? errorCallback : onError),
             success: (successCallback ? successCallback : onSuccess)
@@ -71,9 +85,13 @@ Multiplexer = (function () {
         if ('json' == requestFormat) {
             $.each(data, function (uri, response) {
                 if (response.status < 400) {
-                    requests[uri].success(response.response);
+                    if(typeof requests[uri].success == 'function') {
+                        requests[uri].success(response.response);
+                    }
                 } else {
-                    requests[uri].error(response.response);
+                    if(typeof requests[uri].error == 'function') {
+                        requests[uri].error(response.response);
+                    }
                 }
             });
         } else {
@@ -131,11 +149,12 @@ Multiplexer = (function () {
          * @param filter (only multiplex these requests)
          *  ['/foo', '/bar']
          *
-         * @param successCallback will be called on overall success
+         * @param successCallback will be called on overall success, if set, you need to process all response manually
          * @param errorCallback will be called on overall failure
+         * @return $.ajax the jquery ajax object
          */
         call: function (filter, successCallback, errorCallback) {
-            callMasterRequest(filter, successCallback, errorCallback);
+            return callMasterRequest(filter, successCallback, errorCallback);
         },
 
         /**
