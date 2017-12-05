@@ -1,3 +1,8 @@
+UNMAINTAINED
+============
+
+This bundle is no longer maintained. Feel free to fork it if needed.
+
 Overview [![Build Status](https://travis-ci.org/liip/LiipMultiplexBundle.png)](https://travis-ci.org/liip/LiipMultiplexBundle)
 ========
 
